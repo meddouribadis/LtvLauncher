@@ -32,12 +32,14 @@ class CategoryCleanRow extends StatelessWidget
   final List<App> applications;
 
   final bool isFirstSection;
+  final double scrollAlignment;
 
   CategoryCleanRow({
     Key? key,
     required this.category,
     required this.applications,
     this.isFirstSection = false,
+    this.scrollAlignment = 0.5,
   }) : super(key: key);
 
   @override
@@ -59,6 +61,7 @@ class CategoryCleanRow extends StatelessWidget
                   application: applications[index],
                   autofocus: index == 0,
                   handleUpNavigationToSettings: isFirstSection,
+                  scrollAlignment: scrollAlignment,
                   onMove: (direction) => _onMove(context, direction, index),
                   onMoveEnd: () => _onMoveEnd(context),
                 ),

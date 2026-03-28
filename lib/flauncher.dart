@@ -27,6 +27,7 @@ import 'package:flauncher/providers/launcher_state.dart';
 import 'package:flauncher/providers/wallpaper_service.dart';
 import 'package:flauncher/widgets/app_card.dart';
 import 'package:flauncher/widgets/apps_grid.dart';
+import 'package:flauncher/widgets/category_clean_row.dart';
 import 'package:flauncher/widgets/category_row.dart';
 import 'package:flauncher/widgets/launcher_alternative_view.dart';
 import 'package:flauncher/widgets/focus_aware_app_bar.dart';
@@ -107,12 +108,23 @@ class _FLauncherState extends State<FLauncher> {
         children: [
           if (favoriteApps.isNotEmpty) ...[
             // Pushes the dock to the bottom of the screen initially
-            SizedBox(height: MediaQuery.of(context).size.height - 150),
-            _dock(favoritesCategory!, favoriteApps, appsService)
+            SizedBox(
+              height: MediaQuery.of(context).size.height
+                  - MediaQuery.of(context).padding.top    // status bar
+                  - kToolbarHeight                         // AppBar
+                  - 180,                                   // hauteur estimée du dock
+            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 12, right: 12, bottom: 30),
+                child: _dock(favoritesCategory!, favoriteApps, appsService)
+            )
           ],
           // Other apps sections
-          _sections(otherSections, firstCategoryAlreadyFound: favoriteApps.isNotEmpty),
-          
+          Padding(
+              padding: const EdgeInsets.only(left: 12, right: 12),
+              child: _sections(otherSections, firstCategoryAlreadyFound: favoriteApps.isNotEmpty)
+          ),
+
           const SizedBox(height: 64), // Bottom padding
         ],
       ),
@@ -140,38 +152,11 @@ class _FLauncherState extends State<FLauncher> {
                 )
               ],
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: favoriteApps.asMap().entries.map((entry) {
-                int index = entry.key;
-                App app = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: SizedBox(
-                    width: 200,
-                    child: AppCard(
-                      application: app,
-                      category: favoritesCategory!,
-                      autofocus: index == 0,
-                      handleUpNavigationToSettings: true,
-                      scrollAlignment: 0.9, // Force the scroll to return to the initial position (bottom)
-                      onMove: (direction) {
-                        int newIndex = -1;
-                        if (direction == AxisDirection.right && index < favoriteApps.length - 1) {
-                          newIndex = index + 1;
-                        } else if (direction == AxisDirection.left && index > 0) {
-                          newIndex = index - 1;
-                        }
-                        if (newIndex != -1) {
-                          appsService.reorderApplication(favoritesCategory!, index, newIndex);
-                          appsService.setPendingReorderFocus(app.packageName, favoritesCategory!.id);
-                        }
-                      },
-                      onMoveEnd: () => appsService.saveApplicationOrderInCategory(favoritesCategory!),
-                    ),
-                  ),
-                );
-              }).toList(),
+            child: CategoryCleanRow(
+              category: favoritesCategory,
+              applications: favoriteApps,
+              isFirstSection: false,
+              scrollAlignment: 1.0,
             ),
           ),
         ),
