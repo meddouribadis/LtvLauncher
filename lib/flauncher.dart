@@ -17,7 +17,6 @@
  */
 
 
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flauncher/actions.dart';
@@ -46,7 +45,6 @@ class FLauncher extends StatefulWidget {
 
 class _FLauncherState extends State<FLauncher> {
   final GlobalKey<FocusAwareAppBarState> _appBarKey = GlobalKey();
-  App? _focusedApp;
 
   @override
   Widget build(BuildContext context) => Actions(
@@ -96,21 +94,12 @@ class _FLauncherState extends State<FLauncher> {
     final apps = appsService.applications.take(5).toList();
     if (apps.isEmpty) return _emptyState(context);
 
-    // Initial focused app
-    if (_focusedApp == null || !apps.any((a) => a.packageName == _focusedApp!.packageName)) {
-      _focusedApp = apps.first;
-    }
-
     return Column(
       children: [
-        // Top Shelf (Preview area)
-        Expanded(
-          flex: 3,
-          child: _tvOSShelf(_focusedApp!),
-        ),
+        const Spacer(),
         // Dock Area
         Padding(
-          padding: const EdgeInsets.only(bottom: 48.0),
+          padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 48.0),
           child: Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(32),
@@ -130,26 +119,17 @@ class _FLauncherState extends State<FLauncher> {
                       App app = entry.value;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Focus(
-                          onFocusChange: (hasFocus) {
-                            if (hasFocus) {
-                              setState(() {
-                                _focusedApp = app;
-                              });
-                            }
-                          },
-                          child: SizedBox(
-                            width: 220,
-                            child: AppCard(
-                              application: app,
-                              category: appsService.categories.isNotEmpty 
-                                  ? appsService.categories.first 
-                                  : Category(id: -1, name: "Dock", order: 0),
-                              autofocus: index == 0,
-                              handleUpNavigationToSettings: true,
-                              onMove: (_) {},
-                              onMoveEnd: () {},
-                            ),
+                        child: SizedBox(
+                          width: 200,
+                          child: AppCard(
+                            application: app,
+                            category: appsService.categories.isNotEmpty 
+                                ? appsService.categories.first 
+                                : Category(id: -1, name: "Dock", order: 0),
+                            autofocus: index == 0,
+                            handleUpNavigationToSettings: true,
+                            onMove: (_) {},
+                            onMoveEnd: () {},
                           ),
                         ),
                       );
@@ -161,91 +141,6 @@ class _FLauncherState extends State<FLauncher> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _tvOSShelf(App app) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
-      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-      child: Container(
-        key: ValueKey(app.packageName),
-        width: double.infinity,
-        height: double.infinity,
-        child: Consumer<AppsService>(
-          builder: (context, appsService, _) {
-            return FutureBuilder<Uint8List>(
-              future: appsService.getAppBanner(app.packageName),
-              builder: (context, snapshot) {
-                final banner = snapshot.data;
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (banner != null && banner.isNotEmpty)
-                      Image.memory(
-                        banner,
-                        fit: BoxFit.cover,
-                        color: Colors.black.withOpacity(0.4),
-                        colorBlendMode: BlendMode.darken,
-                      ),
-                    // Gradient to make text readable
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.2),
-                            Colors.black.withOpacity(0.8),
-                          ],
-                          stops: const [0.0, 0.5, 1.0],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(64.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            app.name,
-                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              shadows: [
-                                const Shadow(blurRadius: 20, color: Colors.black, offset: Offset(2, 2))
-                              ]
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              "APPLICATION",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
-      ),
     );
   }
 
