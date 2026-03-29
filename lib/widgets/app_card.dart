@@ -148,78 +148,120 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                   curve: Curves.easeInOut,
                   transformAlignment: Alignment.center,
                   transform: _scaleTransform(context),
-                  child: Material(
-                borderRadius: BorderRadius.circular(8),
-                clipBehavior: Clip.antiAlias,
-                elevation: shouldHighlight ? 16 : 0,
-                shadowColor: Colors.black,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    InkWell(
-                      focusNode: _focusNode,
-                      autofocus: widget.autofocus,
-                      focusColor: Colors.transparent,
-                      child: _appImage(),
-                      onTap: () => _onPressed(context, LogicalKeyboardKey.enter),
-                      onLongPress: () => _onLongPress(context, LogicalKeyboardKey.enter),
-                      onFocusChange: (focused) {
-                        if (focused) {
-                          Scrollable.ensureVisible(
-                            context,
-                            alignment: widget.scrollAlignment,
-                            curve: Curves.easeInOut,
-                            duration: Duration(milliseconds: 100)
-                          );
-                        }
-                      },
-
-                    ),
-                    if (_moving) ..._arrows(),
-                    IgnorePointer(
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        opacity: shouldHighlight ? 0 : 0.10,
-                        child: Container(color: Colors.black),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(shouldHighlight ? 0.6 : 0.2),
+                        blurRadius: shouldHighlight ? 32 : 6,
+                        spreadRadius: shouldHighlight ? 2 : 0,
+                        offset: Offset(0, shouldHighlight ? 16 : 4),
                       ),
-                    ),
-                    Selector<SettingsService, (bool, String)>(
-                      selector: (_, settingsService) => (settingsService.appHighlightAnimationEnabled, settingsService.accentColorHex),
-                      builder: (context, settings, _) {
-                        final (animationEnabled, accentColorHex) = settings;
-                        final accentColor = Color(int.parse('FF$accentColorHex', radix: 16));
-                        
-                        if (shouldHighlight) {
-                          if (animationEnabled) {
-                            _animation.repeat(reverse: true);
-                            return AnimatedBuilder(
-                              animation: CurvedAnimation(parent: _animation, curve: Curves.easeInOut),
-                              builder: (context, child) {
-                                final opacity = 0.4 + (_animation.value * 0.6);
-                                
+                    ],
+                  ),
+                  child: Material(
+                    borderRadius: BorderRadius.circular(16),
+                    clipBehavior: Clip.antiAlias,
+                    elevation: 0,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        InkWell(
+                          focusNode: _focusNode,
+                          autofocus: widget.autofocus,
+                          focusColor: Colors.transparent,
+                          child: _appImage(),
+                          onTap: () => _onPressed(context, LogicalKeyboardKey.enter),
+                          onLongPress: () => _onLongPress(context, LogicalKeyboardKey.enter),
+                          onFocusChange: (focused) {
+                            if (focused) {
+                              Scrollable.ensureVisible(
+                                context,
+                                alignment: widget.scrollAlignment,
+                                curve: Curves.easeInOut,
+                                duration: Duration(milliseconds: 100)
+                              );
+                            }
+                          },
+
+                        ),
+                        if (_moving) ..._arrows(),
+                        IgnorePointer(
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            opacity: shouldHighlight ? 0 : 0.10,
+                            child: Container(color: Colors.black),
+                          ),
+                        ),
+                        Selector<SettingsService, (bool, String)>(
+                          selector: (_, settingsService) => (settingsService.appHighlightAnimationEnabled, settingsService.accentColorHex),
+                          builder: (context, settings, _) {
+                            final (animationEnabled, accentColorHex) = settings;
+                            final accentColor = Color(int.parse('FF$accentColorHex', radix: 16));
+                            
+                            if (shouldHighlight) {
+                              if (animationEnabled) {
+                                _animation.repeat(reverse: true);
+                                return AnimatedBuilder(
+                                  animation: CurvedAnimation(parent: _animation, curve: Curves.easeInOut),
+                                  builder: (context, child) {
+                                    final opacity = 0.4 + (_animation.value * 0.6);
+                                    
+                                    return IgnorePointer(
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          // Outer outline (Accent Color)
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(16),
+                                              border: Border.all(
+                                                color: accentColor.withOpacity(opacity),
+                                                width: 2
+                                              ),
+                                            ),
+                                          ),
+                                          // Inner outline (Black)
+                                          Padding(
+                                            padding: const EdgeInsets.all(2),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(14),
+                                                border: Border.all(
+                                                  color: Colors.black.withOpacity(opacity),
+                                                  width: 2
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              } else {
+                                _animation.stop();
                                 return IgnorePointer(
                                   child: Stack(
                                     fit: StackFit.expand,
                                     children: [
-                                      // Outer outline (Accent Color)
                                       Container(
                                         decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
-                                            color: accentColor.withOpacity(opacity),
+                                            color: accentColor,
                                             width: 2
                                           ),
                                         ),
                                       ),
-                                      // Inner outline (Black)
                                       Padding(
                                         padding: const EdgeInsets.all(2),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(6),
                                             border: Border.all(
-                                              color: Colors.black.withOpacity(opacity),
+                                              color: Colors.black,
                                               width: 2
                                             ),
                                           ),
@@ -228,55 +270,23 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                     ],
                                   ),
                                 );
-                              },
-                            );
-                          } else {
-                            _animation.stop();
-                            return IgnorePointer(
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: accentColor,
-                                        width: 2
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(2),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 2
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        }
+                              }
+                            }
 
-                        _animation.stop();
-                        return const SizedBox();
-                      },
+                            _animation.stop();
+                            return const SizedBox();
+                          },
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-},
-  );
 
   Future<(AppImageType, ImageProvider)> _loadAppBannerOrIcon(AppsService service) async {
     Uint8List bytes = Uint8List(0);
