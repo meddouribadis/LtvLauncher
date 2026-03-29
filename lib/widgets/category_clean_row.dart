@@ -55,7 +55,7 @@ class CategoryCleanRow extends StatelessWidget
             return Expanded(
               child: Padding(
                 key: ValueKey(applications[index].packageName),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: AppCard(
                   category: category,
                   application: applications[index],
