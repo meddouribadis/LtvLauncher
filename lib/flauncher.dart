@@ -16,9 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flauncher/actions.dart';
@@ -29,8 +27,8 @@ import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/providers/wallpaper_service.dart';
 import 'package:flauncher/widgets/app_card.dart';
 import 'package:flauncher/widgets/category_clean_row.dart';
-import 'package:flauncher/widgets/category_container_common.dart';
 import 'package:flauncher/widgets/category_row.dart';
+import 'package:flauncher/widgets/dock.dart';
 import 'package:flauncher/widgets/launcher_alternative_view.dart';
 import 'package:flauncher/widgets/focus_aware_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +37,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'models/app.dart';
 import 'models/category.dart';
+
+const _kDockOuterPadding = EdgeInsets.only(left: 12, right: 12, bottom: 6);
 
 class FLauncher extends StatefulWidget {
   const FLauncher({super.key});
@@ -52,58 +52,58 @@ class _FLauncherState extends State<FLauncher> {
 
   @override
   Widget build(BuildContext context) => Actions(
-    actions: <Type, Action<Intent>>{
-      MoveFocusToSettingsIntent: CallbackAction<MoveFocusToSettingsIntent>(
-        onInvoke: (_) => _appBarKey.currentState?.focusSettings(),
-      ),
-    },
-    child: FocusTraversalGroup(
-      policy: RowByRowTraversalPolicy(),
-      child: Stack(
-        children: [
-          RepaintBoundary(
-            child: Consumer<WallpaperService>(
-              builder: (_, wallpaperService, __) => _wallpaper(context, wallpaperService)
-            ),
+        actions: <Type, Action<Intent>>{
+          MoveFocusToSettingsIntent: CallbackAction<MoveFocusToSettingsIntent>(
+            onInvoke: (_) => _appBarKey.currentState?.focusSettings(),
           ),
-          Consumer<LauncherState>(
-            builder: (_, state, child) => Visibility(
-              child: child!,
-              replacement: const Center(
-                child: AlternativeLauncherView()
+        },
+        child: FocusTraversalGroup(
+          policy: RowByRowTraversalPolicy(),
+          child: Stack(
+            children: [
+              RepaintBoundary(
+                child: Consumer<WallpaperService>(
+                  builder: (_, wallpaperService, __) =>
+                      _wallpaper(context, wallpaperService),
+                ),
               ),
-              visible: state.launcherVisible
-            ),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: FocusAwareAppBar(key: _appBarKey),
-              body: Consumer<AppsService>(
-                builder: (context, appsService, _) {
-                  if (appsService.initialized) {
-                    return _tvOSLayout(appsService);
-                  }
-                  else {
-                    return _emptyState(context);
-                  }
-                }
-              )
-            )
-          )
-        ]
-      )
-    ),
-  );
+              Consumer<LauncherState>(
+                builder: (_, state, child) => Visibility(
+                  replacement: const Center(child: AlternativeLauncherView()),
+                  visible: state.launcherVisible,
+                  child: child!,
+                ),
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  appBar: FocusAwareAppBar(key: _appBarKey),
+                  body: Consumer<AppsService>(
+                    builder: (context, appsService, _) {
+                      if (appsService.initialized) {
+                        return _tvOSLayout(appsService);
+                      } else {
+                        return _emptyState(context);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
   Widget _tvOSLayout(AppsService appsService) {
-    final favoritesCategory = appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
-    final favoriteApps = favoritesCategory?.applications ?? [];
+    final favoritesCategory =
+        appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
+    final favoriteApps = favoritesCategory?.applications ?? const [];
 
     final otherSections = appsService.launcherSections.where((section) {
       if (section is Category && section.name == 'Favorites') return false;
       return true;
     }).toList();
 
-    if (favoriteApps.isEmpty && otherSections.isEmpty) return _emptyState(context);
+    if (favoriteApps.isEmpty && otherSections.isEmpty)
+      return _emptyState(context);
 
     return CustomScrollView(
       slivers: [
@@ -118,55 +118,28 @@ class _FLauncherState extends State<FLauncher> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 6),
-              child: _dock(favoritesCategory!, favoriteApps, appsService),
+              padding: _kDockOuterPadding,
+              child: Dock(
+                category: favoritesCategory!,
+                apps: favoriteApps,
+                appsService: appsService,
+              ),
             ),
           ),
         ],
-        ..._buildSectionSlivers(otherSections, firstCategoryAlreadyFound: favoriteApps.isNotEmpty),
+        ..._buildSectionSlivers(otherSections,
+            firstCategoryAlreadyFound: favoriteApps.isNotEmpty),
         const SliverToBoxAdapter(child: SizedBox(height: 64)),
       ],
     );
   }
 
-  Widget _dock(Category favoritesCategory, List<App> favoriteApps, AppsService appsService) {
-
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                )
-              ],
-            ),
-            child: CategoryCleanRow(
-              category: favoritesCategory,
-              applications: favoriteApps,
-              isFirstSection: false,
-              scrollAlignment: 1.0,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildSectionSlivers(List<LauncherSection> sections, {bool firstCategoryAlreadyFound = false}) {
-    List<Widget> slivers = [];
+  List<Widget> _buildSectionSlivers(List<LauncherSection> sections,
+      {bool firstCategoryAlreadyFound = false}) {
+    final List<Widget> slivers = [];
     bool firstCategoryFound = firstCategoryAlreadyFound;
 
-    for (var section in sections) {
+    for (final section in sections) {
       final Key sectionKey = Key(section.id.toString());
 
       if (section is LauncherSpacer) {
@@ -177,13 +150,12 @@ class _FLauncherState extends State<FLauncher> {
         continue;
       }
 
-      Category category = section as Category;
+      final category = section as Category;
       if (category.applications.isEmpty) continue;
 
-      bool isFirstSection = !firstCategoryFound;
+      final bool isFirstSection = !firstCategoryFound;
       if (isFirstSection) firstCategoryFound = true;
 
-      // Category title
       slivers.add(SliverToBoxAdapter(
         child: Selector<SettingsService, bool>(
           selector: (context, service) => service.showCategoryTitles,
@@ -191,11 +163,16 @@ class _FLauncherState extends State<FLauncher> {
             if (showTitle) {
               return Padding(
                 padding: const EdgeInsets.only(left: 40, bottom: 8, top: 8),
-                child: Text(category.name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(shadows: [const Shadow(color: Colors.black54, offset: Offset(1, 1), blurRadius: 8)]),
+                child: Text(
+                  category.name,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    shadows: const [
+                      Shadow(
+                          color: Colors.black54,
+                          offset: Offset(1, 1),
+                          blurRadius: 8),
+                    ],
+                  ),
                 ),
               );
             }
@@ -234,19 +211,26 @@ class _FLauncherState extends State<FLauncher> {
                 childCount: category.applications.length,
                 findChildIndexCallback: (Key key) {
                   final valueKey = key as ValueKey<String>;
-                  final index = category.applications.indexWhere((app) => app.packageName == valueKey.value);
+                  final index = category.applications.indexWhere(
+                    (app) => app.packageName == valueKey.value,
+                  );
                   return index >= 0 ? index : null;
                 },
                 (context, index) => Padding(
                   key: Key(category.applications[index].packageName),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                   child: AppCard(
                     category: category,
                     application: category.applications[index],
                     autofocus: index == 0,
-                    handleUpNavigationToSettings: isFirstSection && index < category.columnsCount,
-                    onMove: (direction) => _onGridMove(context, category, index, direction),
-                    onMoveEnd: () => context.read<AppsService>().saveApplicationOrderInCategory(category),
+                    handleUpNavigationToSettings:
+                        isFirstSection && index < category.columnsCount,
+                    onMove: (direction) =>
+                        _onGridMove(context, category, index, direction),
+                    onMoveEnd: () => context
+                        .read<AppsService>()
+                        .saveApplicationOrderInCategory(category),
                   ),
                 ),
               ),
@@ -259,10 +243,12 @@ class _FLauncherState extends State<FLauncher> {
     return slivers;
   }
 
-  void _onGridMove(BuildContext context, Category category, int index, AxisDirection direction) {
+  void _onGridMove(BuildContext context, Category category, int index,
+      AxisDirection direction) {
     final applications = category.applications;
     final currentRow = (index / category.columnsCount).floor();
-    final totalRows = ((applications.length - 1) / category.columnsCount).floor();
+    final totalRows =
+        ((applications.length - 1) / category.columnsCount).floor();
 
     int? newIndex;
     switch (direction) {
@@ -273,7 +259,9 @@ class _FLauncherState extends State<FLauncher> {
         if (index < applications.length - 1) newIndex = index + 1;
         break;
       case AxisDirection.down:
-        if (currentRow < totalRows) newIndex = min(index + category.columnsCount, applications.length - 1);
+        if (currentRow < totalRows)
+          newIndex =
+              min(index + category.columnsCount, applications.length - 1);
         break;
       case AxisDirection.left:
         if (index > 0) newIndex = index - 1;
@@ -296,24 +284,26 @@ class _FLauncherState extends State<FLauncher> {
         key: const Key("background"),
         fit: BoxFit.cover,
         height: physicalSize.height,
-        width: physicalSize.width
+        width: physicalSize.width,
       );
-    }
-    else {
-      return Container(key: const Key("background"), decoration: BoxDecoration(gradient: wallpaperService.gradient.gradient));
+    } else {
+      return Container(
+        key: const Key("background"),
+        decoration: BoxDecoration(gradient: wallpaperService.gradient.gradient),
+      );
     }
   }
 
   Widget _emptyState(BuildContext context) {
-    AppLocalizations localizations = AppLocalizations.of(context)!;
-
+    final localizations = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(localizations.loading, style: Theme.of(context).textTheme.titleLarge),
+          Text(localizations.loading,
+              style: Theme.of(context).textTheme.titleLarge),
         ],
       ),
     );
