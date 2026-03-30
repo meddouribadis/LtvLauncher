@@ -60,13 +60,15 @@ class AppsGrid extends StatelessWidget
           (context, index) => Padding(
             key: Key(applications[index].packageName),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            child: AppCard(
+            child: RepaintBoundary(
+              child: AppCard(
                 category: category,
                 application: applications[index],
                 autofocus: index == 0,
                 handleUpNavigationToSettings: isFirstSection && index < category.columnsCount,
                 onMove: (direction) => _onMove(context, direction, index),
                 onMoveEnd: () => _saveOrder(context)
+              ),
             ),
           )
         )

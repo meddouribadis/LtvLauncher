@@ -53,7 +53,8 @@ class CategoryCleanRow extends StatelessWidget
         children: List.generate(6, (index) {
           if (index < applications.length) {
             return Expanded(
-              child: Padding(
+              child: RepaintBoundary(
+                child: Padding(
                 key: ValueKey(applications[index].packageName),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: AppCard(
@@ -64,6 +65,7 @@ class CategoryCleanRow extends StatelessWidget
                   scrollAlignment: scrollAlignment,
                   onMove: (direction) => _onMove(context, direction, index),
                   onMoveEnd: () => _onMoveEnd(context),
+                  ),
                 ),
               ),
             );
