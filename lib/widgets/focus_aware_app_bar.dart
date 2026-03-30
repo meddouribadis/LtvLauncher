@@ -136,6 +136,7 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
                           key: const Key("statusbar_date"),
                           updateInterval: const Duration(minutes: 1),
                           textStyle: textStyle,
+                          animate: false,
                         ),
                       
                       if (dateTimeSettings.showDateInStatusBar && dateTimeSettings.showTimeInStatusBar)
@@ -147,6 +148,7 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
                           dateTimeSettings.timeFormat,
                           key: const Key("statusbar_clock"),
                           textStyle: textStyle.copyWith(fontWeight: FontWeight.bold),
+                          animate: false,
                         ),
                     ]
                   );
