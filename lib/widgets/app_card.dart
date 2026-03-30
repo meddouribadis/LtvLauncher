@@ -16,12 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:async';
-
 import 'package:flauncher/actions.dart';
 import 'package:flauncher/app_image_type.dart';
 import 'package:flauncher/providers/apps_service.dart';
-import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/widgets/application_info_panel.dart';
 import 'package:flauncher/widgets/focus_keyboard_listener.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +27,7 @@ import 'package:provider/provider.dart';
 
 import '../models/app.dart';
 import '../models/category.dart';
+import '../providers/settings_service.dart';
 
 const _validationKeys = [
   LogicalKeyboardKey.select,
@@ -66,7 +64,9 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   bool _clicked = false;
   late FocusNode _focusNode;
 
-  late Future<(AppImageType, ImageProvider)> _appImageLoadFuture;
+  (AppImageType, ImageProvider)? _loadedImage;
+  bool _imageLoadError = false;
+
   late final AnimationController _animation = AnimationController(
     vsync: this,
     duration: const Duration(
@@ -75,7 +75,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   );
 
   late final CurvedAnimation _curvedAnimation =
-      CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
+  CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
 
   @override
   void initState() {
@@ -83,8 +83,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     _focusNode = FocusNode();
 
     FocusManager.instance.addHighlightModeListener(_focusHighlightModeChanged);
-    _appImageLoadFuture =
-        _loadAppBannerOrIcon(Provider.of<AppsService>(context, listen: false));
+    _loadAppImage(Provider.of<AppsService>(context, listen: false));
 
     // Check if we need to restore focus/reorder mode after a move
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -128,8 +127,8 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   void dispose() {
     FocusManager.instance
         .removeHighlightModeListener(_focusHighlightModeChanged);
-    _animation.dispose();
     _focusNode.dispose();
+    _animation.dispose();
     _curvedAnimation.dispose();
 
     super.dispose();
@@ -137,21 +136,20 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) => FocusKeyboardListener(
-        onPressed: (key) => _onPressed(context, key),
-        onLongPress: (key) => _onLongPress(context, key),
+        onPressed: _onPressed,
+        onLongPress: _onLongPress,
         builder: (context) {
           final bool shouldHighlight = _shouldHighlight(context);
 
           return AnimatedScale(
-            scale: _clicked ? 0.9 : 1.0,
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOutCubic,
-            child: AnimatedOpacity(
-              opacity: _clicked ? 0.5 : 1.0,
+              scale: _clicked ? 0.9 : 1.0,
               duration: const Duration(milliseconds: 150),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: RepaintBoundary(
+              curve: Curves.easeOutCubic,
+              child: AnimatedOpacity(
+                opacity: _clicked ? 0.5 : 1.0,
+                duration: const Duration(milliseconds: 150),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
                   child: AnimatedScale(
                     scale: !_moving && shouldHighlight ? 1.1 : 1.0,
                     duration: const Duration(milliseconds: 200),
@@ -212,10 +210,10 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                 autofocus: widget.autofocus,
                                 focusColor: Colors.transparent,
                                 child: _appImage(),
-                                onTap: () => _onPressed(
-                                    context, LogicalKeyboardKey.enter),
-                                onLongPress: () => _onLongPress(
-                                    context, LogicalKeyboardKey.enter),
+                                onTap: () =>
+                                    _onPressed(LogicalKeyboardKey.enter),
+                                onLongPress: () =>
+                                    _onLongPress(LogicalKeyboardKey.enter),
                                 onFocusChange: (focused) {
                                   if (focused) {
                                     Scrollable.ensureVisible(context,
@@ -278,94 +276,94 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
-            ),
-          );
+            );
         },
       );
 
-  Future<(AppImageType, ImageProvider)> _loadAppBannerOrIcon(
-      AppsService service) async {
-    Uint8List bytes = Uint8List(0);
+  Future<void> _loadAppImage(AppsService service) async {
+    try {
+      Uint8List bytes = await service.getAppBanner(widget.application.packageName);
+      AppImageType type = AppImageType.Banner;
 
-    bytes = await service.getAppBanner(widget.application.packageName);
-    AppImageType type = AppImageType.Banner;
+      if (bytes.isEmpty) {
+        type = AppImageType.Icon;
+        bytes = await service.getAppIcon(widget.application.packageName);
+      }
 
-    if (bytes.isEmpty) {
-      type = AppImageType.Icon;
-      bytes = await service.getAppIcon(widget.application.packageName);
+      if (mounted) {
+        setState(() {
+          _loadedImage = (type, ResizeImage(MemoryImage(bytes), width: 480));
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _imageLoadError = true);
+      }
     }
-
-    return (type, ResizeImage(MemoryImage(bytes), width: 480));
   }
 
   Widget _appImage() {
-    App app = widget.application;
-
-    return FutureBuilder(
-        future: _appImageLoadFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            (AppImageType, ImageProvider) record = snapshot.data!;
-
-            if (record.$1 == AppImageType.Banner) {
-              return Ink.image(image: record.$2, fit: BoxFit.cover);
-            } else {
-              return Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Ink.image(
-                        image: record.$2,
-                        height: double.maxFinite,
-                      ),
-                    ),
-                    Flexible(
-                      flex: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          app.name,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 3,
-                        ),
-                      ),
-                    ),
-                  ],
+    if (_loadedImage != null) {
+      final (type, image) = _loadedImage!;
+      if (type == AppImageType.Banner) {
+        return Ink.image(image: image, fit: BoxFit.cover);
+      }
+      return Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Ink.image(image: image, height: double.maxFinite),
+            ),
+            Flexible(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  widget.application.name,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
                 ),
-              );
-            }
-          } else if (snapshot.hasError) {
-            return Padding(
-              padding: const EdgeInsets.all(8),
-              child: Center(
-                  child: Text(
-                app.name,
-                style: Theme.of(context).textTheme.bodySmall,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 3,
-              )),
-            );
-          } else {
-            return const Padding(
-              padding: EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 0, width: 16),
-                  Text("Loading")
-                ],
               ),
-            );
-          }
-        });
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_imageLoadError) {
+      return Padding(
+        padding: const EdgeInsets.all(8),
+        child: Center(
+          child: Text(
+            widget.application.name,
+            style: Theme.of(context).textTheme.bodySmall,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
+          ),
+        ),
+      );
+    }
+
+    return const Padding(
+      padding: EdgeInsets.all(8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 0, width: 16),
+          Text("Loading"),
+        ],
+      ),
+    );
   }
 
   void _focusHighlightModeChanged(FocusHighlightMode mode) {
-    setState(() {});
+    //if (_focusNode.hasFocus) {
+      setState(() {});
+    //}
   }
 
   bool _shouldHighlight(BuildContext context) {
@@ -412,7 +410,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                       onPressed: onTap,
                       padding: EdgeInsets.all(0)))));
 
-  KeyEventResult _onPressed(BuildContext context, LogicalKeyboardKey? key) {
+  KeyEventResult _onPressed(LogicalKeyboardKey key) {
     if (_moving) {
       WidgetsBinding.instance.addPostFrameCallback((_) =>
           Scrollable.ensureVisible(context,
@@ -459,15 +457,15 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     return KeyEventResult.ignored;
   }
 
-  KeyEventResult _onLongPress(BuildContext context, LogicalKeyboardKey? key) {
-    if (!_moving && (key == null || longPressableKeys.contains(key))) {
-      _showPanel(context);
+  KeyEventResult _onLongPress(LogicalKeyboardKey key) {
+    if (!_moving && longPressableKeys.contains(key)) {
+      _showPanel();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
 
-  Future<void> _showPanel(BuildContext context) async {
+  Future<void> _showPanel() async {
     final result = await showDialog<ApplicationInfoPanelResult>(
       context: context,
       builder: (context) => ApplicationInfoPanel(
