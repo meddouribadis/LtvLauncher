@@ -135,7 +135,12 @@ class _AppCardState extends State<AppCard> /* with SingleTickerProviderStateMixi
   }
 
   @override
-  Widget build(BuildContext context) => FocusKeyboardListener(
+  Widget build(BuildContext context) {
+    // Built outside the builder closure so focus-change rebuilds reuse the same
+    // widget reference (Flutter skips updating identical widget objects).
+    final imageWidget = _appImage();
+
+    return FocusKeyboardListener(
         onPressed: _onPressed,
         onLongPress: _onLongPress,
         builder: (context) {
@@ -209,7 +214,7 @@ class _AppCardState extends State<AppCard> /* with SingleTickerProviderStateMixi
                                 focusNode: _focusNode,
                                 autofocus: widget.autofocus,
                                 focusColor: Colors.transparent,
-                                child: _appImage(),
+                                child: imageWidget,
                                 onTap: () =>
                                     _onPressed(LogicalKeyboardKey.enter),
                                 onLongPress: () =>
@@ -279,6 +284,7 @@ class _AppCardState extends State<AppCard> /* with SingleTickerProviderStateMixi
             );
         },
       );
+  }
 
   Future<void> _loadAppImage(AppsService service) async {
     try {
