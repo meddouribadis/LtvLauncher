@@ -16,8 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -27,12 +25,12 @@ import 'package:flauncher/providers/apps_service.dart';
 import 'package:flauncher/providers/launcher_state.dart';
 import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/providers/wallpaper_service.dart';
-import 'package:flauncher/widgets/app_card.dart';
+import 'package:flauncher/widgets/apps_grid_sliver.dart';
 import 'package:flauncher/widgets/category_clean_row.dart';
-import 'package:flauncher/widgets/category_container_common.dart';
 import 'package:flauncher/widgets/category_row.dart';
 import 'package:flauncher/widgets/launcher_alternative_view.dart';
 import 'package:flauncher/widgets/focus_aware_app_bar.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -52,117 +50,125 @@ class _FLauncherState extends State<FLauncher> {
 
   @override
   Widget build(BuildContext context) => Actions(
-    actions: <Type, Action<Intent>>{
-      MoveFocusToSettingsIntent: CallbackAction<MoveFocusToSettingsIntent>(
-        onInvoke: (_) => _appBarKey.currentState?.focusSettings(),
-      ),
-    },
-    child: FocusTraversalGroup(
-      policy: RowByRowTraversalPolicy(),
-      child: Stack(
-        children: [
-          RepaintBoundary(
-            child: Consumer<WallpaperService>(
-              builder: (_, wallpaperService, __) => _wallpaper(context, wallpaperService)
-            ),
+        actions: <Type, Action<Intent>>{
+          MoveFocusToSettingsIntent: CallbackAction<MoveFocusToSettingsIntent>(
+            onInvoke: (_) => _appBarKey.currentState?.focusSettings(),
           ),
-          Consumer<LauncherState>(
-            builder: (_, state, child) => Visibility(
-              child: child!,
-              replacement: const Center(
-                child: AlternativeLauncherView()
+        },
+        child: FocusTraversalGroup(
+            policy: RowByRowTraversalPolicy(),
+            child: Stack(children: [
+              RepaintBoundary(
+                child: Consumer<WallpaperService>(
+                    builder: (_, wallpaperService, __) =>
+                        _wallpaper(context, wallpaperService)),
               ),
-              visible: state.launcherVisible
+              Consumer<LauncherState>(
+                  builder: (_, state, child) => Visibility(
+                      child: child!,
+                      replacement:
+                          const Center(child: AlternativeLauncherView()),
+                      visible: state.launcherVisible),
+                  child: Scaffold(
+                      backgroundColor: Colors.transparent,
+                      appBar: FocusAwareAppBar(key: _appBarKey),
+                      body: Consumer<AppsService>(
+                          builder: (context, appsService, _) {
+                        if (appsService.initialized) {
+                          return _tvOSLayout();
+                        } else {
+                          return _emptyState(context);
+                        }
+                      })))
+            ])),
+      );
+
+  Widget _tvOSLayout() {
+    return Selector<AppsService, _TVOSLayoutData>(
+      selector: (_, svc) => _TVOSLayoutData(
+        favoritesCategory:
+            svc.categories.firstWhereOrNull((c) => c.name == 'Favorites'),
+        otherSections: svc.launcherSections.where((section) {
+          if (section is Category && section.name == 'Favorites') return false;
+          return true;
+        }).toList(),
+      ),
+      shouldRebuild: (prev, next) =>
+          prev.favoritesCategory != next.favoritesCategory ||
+          prev.otherSections != next.otherSections,
+      builder: (context, data, _) {
+        final favoriteApps = data.favoritesCategory?.applications ?? [];
+
+        if (favoriteApps.isEmpty && data.otherSections.isEmpty) {
+          return _emptyState(context);
+        }
+
+        return CustomScrollView(
+          slivers: [
+            if (favoriteApps.isNotEmpty) ...[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      kToolbarHeight -
+                      150,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 12, right: 12, bottom: 6),
+                  child: _dock(data.favoritesCategory!, favoriteApps),
+                ),
+              ),
+            ],
+            ..._buildSectionSlivers(
+              data.otherSections,
+              firstCategoryAlreadyFound: favoriteApps.isNotEmpty,
             ),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: FocusAwareAppBar(key: _appBarKey),
-              body: Consumer<AppsService>(
-                builder: (context, appsService, _) {
-                  if (appsService.initialized) {
-                    return _tvOSLayout(appsService);
-                  }
-                  else {
-                    return _emptyState(context);
-                  }
-                }
-              )
-            )
-          )
-        ]
-      )
-    ),
-  );
-
-  Widget _tvOSLayout(AppsService appsService) {
-    final favoritesCategory = appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
-    final favoriteApps = favoritesCategory?.applications ?? [];
-
-    final otherSections = appsService.launcherSections.where((section) {
-      if (section is Category && section.name == 'Favorites') return false;
-      return true;
-    }).toList();
-
-    if (favoriteApps.isEmpty && otherSections.isEmpty) return _emptyState(context);
-
-    return CustomScrollView(
-      slivers: [
-        if (favoriteApps.isNotEmpty) ...[
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height
-                  - MediaQuery.of(context).padding.top
-                  - kToolbarHeight
-                  - 150,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 6),
-              child: _dock(favoritesCategory!, favoriteApps, appsService),
-            ),
-          ),
-        ],
-        ..._buildSectionSlivers(otherSections, firstCategoryAlreadyFound: favoriteApps.isNotEmpty),
-        const SliverToBoxAdapter(child: SizedBox(height: 64)),
-      ],
+            const SliverToBoxAdapter(child: SizedBox(height: 64)),
+          ],
+        );
+      },
     );
   }
 
-  Widget _dock(Category favoritesCategory, List<App> favoriteApps, AppsService appsService) {
-
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                )
-              ],
-            ),
-            child: CategoryCleanRow(
-              category: favoritesCategory,
-              applications: favoriteApps,
-              isFirstSection: false,
-              scrollAlignment: 1.0,
+  Widget _dock(Category favoritesCategory, List<App> favoriteApps) {
+    return RepaintBoundary(
+        child: Center(
+          child: ClipRect(
+            // borderRadius: BorderRadius.circular(32),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
+                  //boxShadow: [
+                  //  BoxShadow(
+                  //    color: Colors.black.withOpacity(0.3),
+                  //    blurRadius: 20,
+                  //    offset: const Offset(0, 10),
+                  //  )
+                  //],
+                ),
+                child: CategoryCleanRow(
+                  category: favoritesCategory,
+                  applications: favoriteApps,
+                  isFirstSection: false,
+                  scrollAlignment: 1.0,
+                ),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
-  List<Widget> _buildSectionSlivers(List<LauncherSection> sections, {bool firstCategoryAlreadyFound = false}) {
+  List<Widget> _buildSectionSlivers(List<LauncherSection> sections,
+      {bool firstCategoryAlreadyFound = false}) {
     List<Widget> slivers = [];
     bool firstCategoryFound = firstCategoryAlreadyFound;
 
@@ -191,11 +197,15 @@ class _FLauncherState extends State<FLauncher> {
             if (showTitle) {
               return Padding(
                 padding: const EdgeInsets.only(left: 40, bottom: 8, top: 8),
-                child: Text(category.name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(shadows: [const Shadow(color: Colors.black54, offset: Offset(1, 1), blurRadius: 8)]),
+                child: Text(
+                  category.name,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      shadows: [
+                        const Shadow(
+                            color: Colors.black54,
+                            offset: Offset(1, 1),
+                            blurRadius: 8)
+                      ]),
                 ),
               );
             }
@@ -222,34 +232,10 @@ class _FLauncherState extends State<FLauncher> {
         case CategoryType.grid:
           slivers.add(SliverPadding(
             padding: const EdgeInsets.only(left: 24, right: 24, bottom: 8),
-            sliver: SliverGrid(
+            sliver: AppsGridSliver(
               key: sectionKey,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: category.columnsCount,
-                childAspectRatio: 16 / 9,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 0,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                childCount: category.applications.length,
-                findChildIndexCallback: (Key key) {
-                  final valueKey = key as ValueKey<String>;
-                  final index = category.applications.indexWhere((app) => app.packageName == valueKey.value);
-                  return index >= 0 ? index : null;
-                },
-                (context, index) => Padding(
-                  key: Key(category.applications[index].packageName),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-                  child: AppCard(
-                    category: category,
-                    application: category.applications[index],
-                    autofocus: index == 0,
-                    handleUpNavigationToSettings: isFirstSection && index < category.columnsCount,
-                    onMove: (direction) => _onGridMove(context, category, index, direction),
-                    onMoveEnd: () => context.read<AppsService>().saveApplicationOrderInCategory(category),
-                  ),
-                ),
-              ),
+              category: category,
+              isFirstSection: isFirstSection,
             ),
           ));
           break;
@@ -259,48 +245,20 @@ class _FLauncherState extends State<FLauncher> {
     return slivers;
   }
 
-  void _onGridMove(BuildContext context, Category category, int index, AxisDirection direction) {
-    final applications = category.applications;
-    final currentRow = (index / category.columnsCount).floor();
-    final totalRows = ((applications.length - 1) / category.columnsCount).floor();
-
-    int? newIndex;
-    switch (direction) {
-      case AxisDirection.up:
-        if (currentRow > 0) newIndex = index - category.columnsCount;
-        break;
-      case AxisDirection.right:
-        if (index < applications.length - 1) newIndex = index + 1;
-        break;
-      case AxisDirection.down:
-        if (currentRow < totalRows) newIndex = min(index + category.columnsCount, applications.length - 1);
-        break;
-      case AxisDirection.left:
-        if (index > 0) newIndex = index - 1;
-        break;
-    }
-
-    if (newIndex != null) {
-      final appsService = context.read<AppsService>();
-      final movingApp = applications[index];
-      appsService.reorderApplication(category, index, newIndex);
-      appsService.setPendingReorderFocus(movingApp.packageName, category.id);
-    }
-  }
-
   Widget _wallpaper(BuildContext context, WallpaperService wallpaperService) {
     if (wallpaperService.wallpaper != null) {
       final physicalSize = MediaQuery.sizeOf(context);
       return Image(
-        image: wallpaperService.wallpaper!,
-        key: const Key("background"),
-        fit: BoxFit.cover,
-        height: physicalSize.height,
-        width: physicalSize.width
-      );
-    }
-    else {
-      return Container(key: const Key("background"), decoration: BoxDecoration(gradient: wallpaperService.gradient.gradient));
+          image: wallpaperService.wallpaper!,
+          key: const Key("background"),
+          fit: BoxFit.cover,
+          height: physicalSize.height,
+          width: physicalSize.width);
+    } else {
+      return Container(
+          key: const Key("background"),
+          decoration:
+              BoxDecoration(gradient: wallpaperService.gradient.gradient));
     }
   }
 
@@ -313,9 +271,29 @@ class _FLauncherState extends State<FLauncher> {
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          Text(localizations.loading, style: Theme.of(context).textTheme.titleLarge),
+          Text(localizations.loading,
+              style: Theme.of(context).textTheme.titleLarge),
         ],
       ),
     );
   }
+}
+
+class _TVOSLayoutData {
+  final Category? favoritesCategory;
+  final List<LauncherSection> otherSections;
+
+  const _TVOSLayoutData({
+    required this.favoritesCategory,
+    required this.otherSections,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      other is _TVOSLayoutData &&
+      other.favoritesCategory == favoritesCategory &&
+      listEquals(other.otherSections, otherSections);
+
+  @override
+  int get hashCode => Object.hash(favoritesCategory, otherSections);
 }
