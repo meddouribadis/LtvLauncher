@@ -165,7 +165,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
           child: AnimatedOpacity(
-            opacity: _clicked ? 0.5 : 1.0,
+            opacity: _clicked ? 0.85 : 1.0,
             duration: const Duration(milliseconds: 150),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -176,13 +176,13 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                     child: RepaintBoundary(
                       child: AnimatedScale(
                         scale: !_moving && shouldHighlight ? 1.1 : 1.0,
-                        duration: const Duration(milliseconds: 200),
+                        duration: const Duration(milliseconds: 150),
                         alignment: Alignment.center,
                         curve: Curves.easeInOut,
                         //transformAlignment: Alignment.center,
                         //transform: _scaleTransform(context),
                         child: Material(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           clipBehavior: Clip.antiAlias,
                           elevation: shouldHighlight ? 16 : 0,
                           shadowColor: Colors.black,
@@ -243,7 +243,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                                   // Outer outline (Accent Color)
                                                   Container(
                                                     decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(8),
+                                                      borderRadius: BorderRadius.circular(12),
                                                       border: Border.all(
                                                         color: accentColor.withOpacity(opacity),
                                                         width: 2
@@ -278,7 +278,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                             children: [
                                               DecoratedBox(
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderRadius: BorderRadius.circular(12),
                                                   border: Border.all(
                                                     color: accentColor,
                                                     width: 2
