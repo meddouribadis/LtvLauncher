@@ -1,4 +1,4 @@
-# LTvLauncher
+# ATvLauncher
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner_dark.svg">
@@ -8,19 +8,17 @@
 
 [![Version](https://img.shields.io/github/v/release/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF&label=Version)](https://github.com/LeanBitLab/LtvLauncher/releases/latest) [![Downloads](https://img.shields.io/github/downloads/LeanBitLab/LtvLauncher/total?style=for-the-badge&color=7C4DFF&label=Downloads)](https://github.com/LeanBitLab/LtvLauncher/releases) [![Stars](https://img.shields.io/github/stars/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF)](https://github.com/LeanBitLab/LtvLauncher/stargazers)
 
-**LTvLauncher** is a fork of [FLauncher](https://github.com/osrosal/flauncher) (originally by [etienn01](https://gitlab.com/flauncher/flauncher)) - an open-source alternative launcher for Android TV.
+**ATvLauncher** is a fork of [LTvLauncher](https://github.com/LeanBitLab/LtvLauncher) (originally by [etienn01](https://gitlab.com/flauncher/flauncher)) - an open-source alternative launcher for Android TV.
 
-This customized version introduces usability enhancements and some UX improvements by [LeanBitLab](https://github.com/LeanBitLab).
+This customized version introduces a modern smart TV-style grid layout, usability enhancements, and UX improvements by [meddouribadis](https://github.com/meddouribadis/LtvLauncher).
 
 <a href="https://github.com/LeanBitLab/LtvLauncher/releases/latest">
   <img alt="Get it on GitHub" src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" height="50">
 </a>
-<a href="https://apt.izzysoft.de/fdroid/index/apk/com.leanbitlab.ltvL">
-  <img alt="Get it on IzzyOnDroid" src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" height="50">
-</a>
 
 ## Key Features & Enhancements
 
+- **Modern TV Layout** - Redesigned home screen inspired by premium smart TV interfaces.
 - **Data Usage Widget** - Track daily Internet consumption directly from the status bar.
 - **Inbuilt OLED Screensaver** - Minimal screensaver with 30s clock position shifting to prevent burn-in.
 - **Easy WiFi Access** - Network indicator doubles as a shortcut to system WiFi settings.
@@ -77,9 +75,11 @@ This customized version introduces usability enhancements and some UX improvemen
 ## Set LTvLauncher as default launcher
 
 ### Method 1: Remap the Home button
+
 This is the "safer" and easiest way. Use [Button Mapper](https://play.google.com/store/apps/details?id=flar2.homebutton) to remap the Home button of the remote to launch LTvLauncher.
 
 ### Method 2: Disable the default launcher
+
 **:warning: Disclaimer :warning:**
 
 **You are doing this at your own risk, and you'll be responsible in any case of malfunction on your device.**
@@ -89,6 +89,7 @@ The following commands have been tested on Chromecast with Google TV only. This 
 Once the default launcher is disabled, press the Home button on the remote, and you'll be prompted by the system to choose which app to set as default.
 
 #### Disable default launcher
+
 ```shell
 # Disable com.google.android.apps.tv.launcherx which is the default launcher on CCwGTV
 $ adb shell pm disable-user --user 0 com.google.android.apps.tv.launcherx
@@ -98,15 +99,18 @@ $ adb shell pm disable-user --user 0 com.google.android.tungsten.setupwraith
 ```
 
 #### Re-enable default launcher
+
 ```shell
 $ adb shell pm enable com.google.android.apps.tv.launcherx
 $ adb shell pm enable com.google.android.tungsten.setupwraith
 ```
 
 #### Known issues
+
 On Chromecast with Google TV (maybe others), the "YouTube" remote button will stop working if the default launcher is disabled. As a workaround, you can use [Button Mapper](https://play.google.com/store/apps/details?id=flar2.homebutton) to remap it correctly.
 
 ## Wallpaper
+
 Because Android's `WallpaperManager` is not available on some Android TV devices, FLauncher implements its own wallpaper management method.
 
 Please note that changing wallpaper requires a file explorer to be installed on the device in order to pick a file.
@@ -114,12 +118,15 @@ Please note that changing wallpaper requires a file explorer to be installed on 
 ## Credits
 
 ### Original Projects
+
 - **[FLauncher](https://gitlab.com/flauncher/flauncher)** by [etienn01](https://github.com/etienn01) - The original project
-- **[FLauncher (Fork)](https://github.com/osrosal/flauncher)** by [osrosal](https://github.com/osrosal) - The base for this fork
+- **[FLauncher (Fork)](https://github.com/osrosal/flauncher)** by [osrosal](https://github.com/osrosal) - Community fork with additional features
+- **[LTvLauncher](https://github.com/LeanBitLab/LtvLauncher)** by [LeanBitLab](https://github.com/LeanBitLab) - The base for this fork
 
 ---
 
 ### LTvLauncher
+
 - Customizations by [LeanBitLab](https://github.com/LeanBitLab)
 
 ---
