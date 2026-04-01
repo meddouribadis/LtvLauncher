@@ -213,27 +213,28 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
 
                               ),
                               if (_moving) ..._arrows(),
-                              const IgnorePointer(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      stops: [0.0, 0.5, 1.0],
-                                      colors: [
-                                        Color(0x1AFFFFFF),
-                                        Color(0xDFFFFFF),
-                                        Colors.black12,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              // const IgnorePointer(
+                              //   child: DecoratedBox(
+                              //     decoration: BoxDecoration(
+                              //       gradient: LinearGradient(
+                              //         begin: Alignment.topCenter,
+                              //         end: Alignment.bottomCenter,
+                              //         stops: [0.0, 0.5, 1.0],
+                              //         colors: [
+                              //           Color(0x1AFFFFFF),
+                              //           Color(0xDFFFFFF),
+                              //           Colors.black12,
+                              //         ],
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
                               IgnorePointer(
-                                child: AnimatedContainer(
+                                child: AnimatedOpacity(
                                   duration: const Duration(milliseconds: 200),
                                   curve: Curves.easeInOut,
-                                  color: shouldHighlight ? Colors.transparent : Colors.black.withOpacity(0.10),
+                                  opacity: shouldHighlight ? 0.0 : 1.3,
+                                  child: const ColoredBox(color: Color(0x1A000000)),
                                 ),
                               ),
                               Selector<SettingsService, (bool, String)>(

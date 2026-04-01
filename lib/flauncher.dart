@@ -301,13 +301,13 @@ class _FLauncherState extends State<FLauncher> {
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(32),
         border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          )
-        ],
+        //boxShadow: [
+        //  BoxShadow(
+        //    color: Colors.black.withOpacity(0.3),
+        //    blurRadius: 20,
+        //    offset: const Offset(0, 10),
+        //  )
+        //],
       ),
       child: CategoryCleanRow(
         category: category,
@@ -318,14 +318,16 @@ class _FLauncherState extends State<FLauncher> {
     );
 
     return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: backdropDisabled
-            ? content
-            : BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: content,
-              ),
+      //child: RepaintBoundary(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: backdropDisabled
+              ? content
+              : BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: content,
+                ),
+        //),
       ),
     );
   }
