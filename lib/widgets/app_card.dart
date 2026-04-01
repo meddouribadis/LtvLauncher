@@ -184,7 +184,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                         child: Material(
                           borderRadius: BorderRadius.circular(12),
                           clipBehavior: Clip.antiAlias,
-                          elevation: shouldHighlight ? 16 : 0,
+                          elevation: shouldHighlight ? 16 : 4,
                           shadowColor: Colors.black,
                           child: Stack(
                             fit: StackFit.expand,
