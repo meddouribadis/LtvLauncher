@@ -148,7 +148,9 @@ class FLauncherApp extends StatelessWidget
       home: Builder(
         builder: (context) => PopScope(
           canPop: false,
-          child: FLauncher(),
+          child: ExcludeSemantics(
+            child: FLauncher(),
+          ),
           onPopInvoked: (didPop) {
             LauncherState launcherState = context.read<LauncherState>();
             launcherState.handleBackNavigation(context);
