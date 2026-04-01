@@ -79,7 +79,7 @@ class _FLauncherState extends State<FLauncher> {
               body: Consumer<AppsService>(
                 builder: (context, appsService, _) {
                   if (appsService.initialized) {
-                    return _tvOSLayout(appsService);
+                    return _tvOSLayout(context, appsService);
                   } else {
                     return _emptyState(context);
                   }
@@ -92,7 +92,7 @@ class _FLauncherState extends State<FLauncher> {
     ),
   );
 
-  Widget _tvOSLayout(AppsService appsService) {
+  Widget _tvOSLayout(BuildContext context, AppsService appsService) {
     final favoritesCategory =
     appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
     final favoriteApps = favoritesCategory?.applications ?? const [];
@@ -123,6 +123,7 @@ class _FLauncherState extends State<FLauncher> {
             child: Padding(
               padding: _kDockOuterPadding,
               child: _dock(
+                context,
                 favoritesCategory!,
                 favoriteApps,
                 appsService,
@@ -284,7 +285,12 @@ class _FLauncherState extends State<FLauncher> {
     }
   }
 
-  Widget _dock(Category category, List<App> apps, AppsService appsService) {
+  Widget _dock(
+    BuildContext context,
+    Category category,
+    List<App> apps,
+    AppsService appsService,
+  ) {
     final backdropDisabled = context.select<SettingsService, bool>(
       (s) => s.dockBackdropFilterDisabled,
     );
