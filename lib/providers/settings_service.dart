@@ -97,7 +97,7 @@ class SettingsService extends ChangeNotifier {
 
   bool get showNetworkIndicatorInStatusBar => _sharedPreferences.getBool(_showNetworkIndicatorInStatusBar) ?? true;
 
-  String get accentColorHex => _sharedPreferences.getString(_accentColor) ?? ACCENT_COLOR_PURPLE;
+  String get accentColorHex => _sharedPreferences.getString(_accentColor) ?? ACCENT_COLOR_WHITE;
 
   String get screensaverClockStyle => _sharedPreferences.getString(_screensaverClockStyle) ?? "minimal";
 
