@@ -1,3 +1,9 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "api"
+    - when: never
+
 variables:
   FLUTTER_DOCKER_IMAGE: cirrusci/flutter:3.7.5
 
