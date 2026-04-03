@@ -46,6 +46,33 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 
 ## Screenshots
 
+### Settings
+
+<table>
+  <tr>
+    <td align="center">Settings 1</td>
+    <td align="center">Settings 2</td>
+    <td align="center">Settings 3</td>
+  </tr>
+  <tr>
+    <td><img src="assets/screen_settings1.png" width="100%" alt="Settings screen 1"/></td>
+    <td><img src="assets/screen_settings2.png" width="100%" alt="Settings screen 2"/></td>
+    <td><img src="assets/screen_settings3.png" width="100%" alt="Settings screen 3"/></td>
+  </tr>
+  <tr>
+    <td align="center">Settings 4</td>
+    <td align="center">Settings 5</td>
+    <td align="center">Settings 6</td>
+  </tr>
+  <tr>
+    <td><img src="assets/screen_settings4.png" width="100%" alt="Settings screen 4"/></td>
+    <td><img src="assets/screen_settings5.png" width="100%" alt="Settings screen 5"/></td>
+    <td><img src="assets/screen_settings6.png" width="100%" alt="Settings screen 6"/></td>
+  </tr>
+</table>
+
+### Gallery
+
 <table>
   <tr>
     <td align="center">Home Screen</td>
