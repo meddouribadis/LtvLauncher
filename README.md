@@ -1,13 +1,7 @@
 # ATvLauncher
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/banner_dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/banner_light.svg">
-  <img alt="ATvLauncher Banner" src="assets/banner_light.svg">
-</picture>
-
-<picture>
-  <img alt="ATvLauncher preview" src="assets/home.webp">
+  <img alt="ATvLauncher Preview" src="assets/home.webp">
 </picture>
 
 [![Version](https://img.shields.io/github/v/release/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF&label=Version)](https://github.com/LeanBitLab/LtvLauncher/releases/latest) [![Downloads](https://img.shields.io/github/downloads/LeanBitLab/LtvLauncher/total?style=for-the-badge&color=7C4DFF&label=Downloads)](https://github.com/LeanBitLab/LtvLauncher/releases) [![Stars](https://img.shields.io/github/stars/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF)](https://github.com/LeanBitLab/LtvLauncher/stargazers)
@@ -46,8 +40,6 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 
 ## Screenshots
 
-### Settings
-
 <table>
   <tr>
     <td align="center">Settings panel</td>
@@ -68,25 +60,6 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
     <td><img src="assets/screen_settings4.png" width="100%" alt="Settings screen 4"/></td>
     <td><img src="assets/screen_settings5.png" width="100%" alt="Settings screen 5"/></td>
     <td><img src="assets/screen_settings6.png" width="100%" alt="Settings screen 6"/></td>
-  </tr>
-</table>
-
-### Gallery
-
-<table>
-  <tr>
-    <td align="center">Home Screen</td>
-    <td align="center">Settings 1</td>
-    <td align="center">Settings 2</td>
-    <td align="center">Settings 3</td>
-    <td align="center">Screensaver</td>
-  </tr>
-  <tr>
-    <td><img src="docs/images/screenshot_1.png" width="100%" alt="Home Screen"/></td>
-    <td><img src="docs/images/screenshot_2.png" width="100%" alt="Settings 1"/></td>
-    <td><img src="docs/images/screenshot_3.png" width="100%" alt="Settings 2"/></td>
-    <td><img src="docs/images/screenshot_4.png" width="100%" alt="Settings 3"/></td>
-    <td><img src="docs/images/screensaver.gif" width="100%" alt="Screensaver"/></td>
   </tr>
 </table>
 
