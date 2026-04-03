@@ -34,6 +34,7 @@ import 'package:flauncher/widgets/focus_aware_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:video_player/video_player.dart';
 
 import 'models/app.dart';
 import 'models/category.dart';
@@ -49,6 +50,13 @@ class FLauncher extends StatefulWidget {
 
 class _FLauncherState extends State<FLauncher> {
   final GlobalKey<FocusAwareAppBarState> _appBarKey = GlobalKey();
+  VideoPlayerController? _videoController;
+
+  @override
+  void dispose() {
+    _disposeVideoController();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Actions(
@@ -333,6 +341,23 @@ class _FLauncherState extends State<FLauncher> {
   }
 
   Widget _wallpaper(BuildContext context, WallpaperService wallpaperService) {
+    if (wallpaperService.videoWallpaper != null && _videoController != null && _videoController!.value.isInitialized) {
+      final physicalSize = MediaQuery.sizeOf(context);
+      return SizedBox(
+        key: const Key("background"),
+        height: physicalSize.height,
+        width: physicalSize.width,
+        child: FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: _videoController!.value.size.width,
+            height: _videoController!.value.size.height,
+            child: VideoPlayer(_videoController!),
+          ),
+        ),
+      );
+    }
+
     if (wallpaperService.wallpaper != null) {
       final physicalSize = MediaQuery.sizeOf(context);
       return Image(
@@ -348,6 +373,12 @@ class _FLauncherState extends State<FLauncher> {
         decoration: BoxDecoration(gradient: wallpaperService.gradient.gradient),
       );
     }
+  }
+
+  void _disposeVideoController() {
+    final controller = _videoController;
+    _videoController = null;
+    controller?.dispose();
   }
 
   Widget _emptyState(BuildContext context) {

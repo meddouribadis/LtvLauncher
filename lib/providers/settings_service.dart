@@ -192,8 +192,15 @@ class SettingsService extends ChangeNotifier {
 
   bool get timeBasedWallpaperEnabled => _sharedPreferences.getBool("time_based_wallpaper_enabled") ?? false;
 
+  bool get videoWallpaperEnabled => _sharedPreferences.getBool("video_wallpaper_enabled") ?? false;
+
   Future<void> setTimeBasedWallpaperEnabled(bool enabled) async {
     await _sharedPreferences.setBool("time_based_wallpaper_enabled", enabled);
+    notifyListeners();
+  }
+
+  Future<void> setVideoWallpaperEnabled(bool enabled) async {
+    await _sharedPreferences.setBool("video_wallpaper_enabled", enabled);
     notifyListeners();
   }
 }

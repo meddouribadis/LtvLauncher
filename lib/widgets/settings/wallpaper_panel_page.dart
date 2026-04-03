@@ -20,6 +20,7 @@ import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/providers/wallpaper_service.dart';
 import 'package:flauncher/widgets/settings/focusable_settings_tile.dart';
 import 'package:flauncher/widgets/settings/gradient_panel_page.dart';
+import 'package:flauncher/widgets/settings/video_wallpaper_panel_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -77,6 +78,16 @@ class WallpaperPanelPage extends StatelessWidget {
                       leading: Icon(Icons.insert_drive_file_outlined),
                       title: Text(localizations.picture, style: Theme.of(context).textTheme.bodyMedium),
                       onPressed: () => _pickWallpaper(context, (s) => s.pickWallpaper(), localizations),
+                    ),
+                    FocusableSettingsTile(
+                      leading: Icon(Icons.cloud_download_outlined),
+                      title: Text("Video wallpapers", style: Theme.of(context).textTheme.bodyMedium),
+                      onPressed: () => Navigator.of(context).pushNamed(VideoWallpaperPanelPage.routeName),
+                    ),
+                    FocusableSettingsTile(
+                      leading: Icon(Icons.hide_source_outlined),
+                      title: Text("Disable video wallpaper", style: Theme.of(context).textTheme.bodyMedium),
+                      onPressed: () => context.read<WallpaperService>().clearVideoWallpaper(),
                     ),
                   ],
                 );

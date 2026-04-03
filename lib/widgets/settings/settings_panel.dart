@@ -34,6 +34,7 @@ import 'package:flauncher/widgets/settings/misc_panel_page.dart';
 import 'package:flauncher/widgets/settings/interface_settings_page.dart';
 import 'package:flauncher/widgets/settings/general_settings_page.dart';
 import 'package:flauncher/widgets/settings/screensaver_clock_style_page.dart';
+import 'package:flauncher/widgets/settings/video_wallpaper_panel_page.dart';
 import 'package:flauncher/models/app.dart';
 import 'package:flutter/material.dart';
 
@@ -83,6 +84,8 @@ class _SettingsPanelState extends State<SettingsPanel> {
                       return _FastPageRoute(builder: (_) => StatusBarPanelPage());
                     case GradientPanelPage.routeName:
                       return _FastPageRoute(builder: (_) => GradientPanelPage());
+                    case VideoWallpaperPanelPage.routeName:
+                      return _FastPageRoute(builder: (_) => VideoWallpaperPanelPage());
                     case ApplicationsPanelPage.routeName:
                       return _FastPageRoute(builder: (_) => ApplicationsPanelPage());
                     case LauncherSectionsPanelPage.routeName:

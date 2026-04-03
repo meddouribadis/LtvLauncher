@@ -21,6 +21,7 @@ dependencies:
   provider: ^6.0.5
   shared_preferences: ^2.3.3
   google_fonts: ^6.2.1
+  video_player: ^2.9.0
   screen_brightness: ^1.0.1
   sqlite3_flutter_libs: ^0.5.13
   flutter_localizations:

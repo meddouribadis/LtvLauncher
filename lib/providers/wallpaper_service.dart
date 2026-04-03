@@ -18,6 +18,7 @@
 
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flauncher/flauncher_channel.dart';
 import 'package:flauncher/gradients.dart';
@@ -25,6 +26,9 @@ import 'package:flauncher/providers/settings_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
+
+import '../video_wallpapers.dart';
 
 class WallpaperService extends ChangeNotifier {
   final FLauncherChannel _fLauncherChannel;
@@ -33,11 +37,15 @@ class WallpaperService extends ChangeNotifier {
   late File _wallpaperFile;
   late File _wallpaperDayFile;
   late File _wallpaperNightFile;
+  File? _videoWallpaperFile;
   Timer? _timer;
 
   ImageProvider? _wallpaper;
+  List<VideoWallpaper> _availableVideoWallpapers = <VideoWallpaper>[];
 
   ImageProvider?  get wallpaper     => _wallpaper;
+  File? get videoWallpaper => _videoWallpaperFile;
+  List<VideoWallpaper> get availableVideoWallpapers => List.unmodifiable(_availableVideoWallpapers);
 
   FLauncherGradient get gradient => FLauncherGradients.all.firstWhere(
         (gradient) => gradient.uuid == _settingsService.gradientUuid,
@@ -55,11 +63,13 @@ class WallpaperService extends ChangeNotifier {
 
   void _onSettingsChanged() {
     final enabled = _settingsService.timeBasedWallpaperEnabled;
+
     if (enabled != _lastTimeBasedEnabled) {
       _lastTimeBasedEnabled = enabled;
       _updateTimerState();
-      _updateWallpaper();
     }
+
+    _updateWallpaper();
   }
 
   @override
@@ -74,6 +84,7 @@ class WallpaperService extends ChangeNotifier {
     _wallpaperFile = File("${directory.path}/wallpaper");
     _wallpaperDayFile = File("${directory.path}/wallpaper_day");
     _wallpaperNightFile = File("${directory.path}/wallpaper_night");
+    _videoWallpaperFile = File("${directory.path}/video_wallpaper");
 
     _lastTimeBasedEnabled = _settingsService.timeBasedWallpaperEnabled;
     _updateWallpaper();
@@ -94,6 +105,7 @@ class WallpaperService extends ChangeNotifier {
     final now = DateTime.now();
     final isDay = now.hour >= 6 && now.hour < 18;
     final enabled = _settingsService.timeBasedWallpaperEnabled;
+    final isVideoWallpaperEnabled = _settingsService.videoWallpaperEnabled;
 
     ImageProvider? newWallpaper;
 
@@ -155,6 +167,113 @@ class WallpaperService extends ChangeNotifier {
     }
 
     _settingsService.setGradientUuid(fLauncherGradient.uuid);
+    notifyListeners();
+  }
+
+  Future<void> loadVideoWallpapersFromJson({
+    String sourceUrl = "https://raw.githubusercontent.com/spocky/projectivy-plugin-wallpaper-overflight/refs/heads/main/videos.json",
+  }) async {
+    final request = await HttpClient().getUrl(Uri.parse(sourceUrl));
+    final response = await request.close();
+    if (response.statusCode != HttpStatus.ok) {
+      throw VideoWallpaperException("Failed to fetch JSON: HTTP ${response.statusCode}");
+    }
+
+    final responseBody = await response.transform(utf8.decoder).join();
+    final dynamic decoded = jsonDecode(responseBody);
+    if (decoded is! List) {
+      throw VideoWallpaperException("Invalid JSON format: expected a list");
+    }
+
+    final wallpapers = <VideoWallpaper>[];
+    for (final item in decoded) {
+      if (item is! Map<String, dynamic>) {
+        continue;
+      }
+      final location = item["location"] as String? ?? "Unknown";
+      final title = item["title"] as String? ?? "Untitled";
+      final rawUrl = item["url_1080p"] as String?;
+      if (rawUrl == null || rawUrl.isEmpty) {
+        continue;
+      }
+
+      final normalizedUrl = rawUrl.startsWith("http://")
+          ? rawUrl.replaceFirst("http://", "https://")
+          : rawUrl;
+      wallpapers.add(VideoWallpaper(location: location, title: title, url: normalizedUrl));
+    }
+
+    if (wallpapers.isEmpty) {
+      throw VideoWallpaperException("No playable video URLs were found in JSON");
+    }
+
+    _availableVideoWallpapers = wallpapers;
+    notifyListeners();
+  }
+
+  Future<File> downloadVideoFromUrl({
+    required String videoUrl,
+    String? fileName,
+  }) async {
+    final uri = Uri.tryParse(videoUrl);
+    if (uri == null || (!uri.hasScheme || !uri.hasAuthority)) {
+      throw VideoWallpaperException("Invalid video URL");
+    }
+
+    final appDirectory = await getApplicationDocumentsDirectory();
+    final videosDirectory = Directory("${appDirectory.path}/video_wallpapers");
+    if (!await videosDirectory.exists()) {
+      await videosDirectory.create(recursive: true);
+    }
+
+    final inferredName = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : "video_wallpaper.mov";
+    final resolvedFileName = _sanitizeFileName(fileName ?? inferredName);
+    final targetFile = File("${videosDirectory.path}/$resolvedFileName");
+
+    try {
+      final request = await HttpClient().getUrl(uri);
+      final response = await request.close();
+
+      if (response.statusCode != HttpStatus.ok) {
+        throw VideoWallpaperException("Failed to download video: HTTP ${response.statusCode}");
+      }
+
+      final sink = targetFile.openWrite();
+      await response.pipe(sink);
+      return targetFile;
+    } catch (_) {
+      if (await targetFile.exists()) {
+        await targetFile.delete();
+      }
+      rethrow;
+    }
+  }
+
+  String _sanitizeFileName(String value) {
+    const fallback = "video_wallpaper.mov";
+    final sanitized = value
+        .replaceAll(RegExp(r'[\\/:*?"<>|]'), "_")
+        .replaceAll(" ", "_");
+    if (sanitized.isEmpty) {
+      return fallback;
+    }
+    return sanitized;
+  }
+
+  Future<void> setVideoWallpaper(String url) async {
+    if (url.isEmpty) {
+      throw VideoWallpaperException("Video URL cannot be empty");
+    }
+
+    await downloadVideoFromUrl(videoUrl: url, fileName: 'video_wallpaper');
+    await _settingsService.setVideoWallpaperEnabled(true);
+
+    notifyListeners();
+  }
+
+  Future<void> clearVideoWallpaper() async {
+    await _settingsService.setVideoWallpaperEnabled(false);
+
     notifyListeners();
   }
 }
