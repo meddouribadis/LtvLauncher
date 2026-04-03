@@ -33,16 +33,16 @@ class LTvLauncherAboutDialog extends StatelessWidget {
     AppLocalizations localizations = AppLocalizations.of(context)!;
 
     return AboutDialog(
-      applicationName: "ATvLauncher",
+      applicationName: "Arc Launcher",
       applicationVersion: "v${packageInfo.version} (${packageInfo.buildNumber})",
       applicationIcon: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.asset("assets/icon.png", height: 72),
       ),
-      applicationLegalese: "Developed by meddouribadis\nBased on LTvLauncher © 2021 LeanBitLab",
+      applicationLegalese: "Developed by Badis Meddouri\nBased on LTvLauncher © 2026 LeanBitLab",
       children: [
         SizedBox(height: 24),
-        Text(localizations.textAboutDialog("https://github.com/meddouribadis/LtvLauncher"))
+        Text(localizations.textAboutDialog("https://gitlab.com/meddouribadis/arclauncher"))
       ],
     );
   }

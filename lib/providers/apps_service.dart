@@ -219,8 +219,8 @@ class AppsService extends ChangeNotifier
     final tvApplications = _applications.values.where((application) => application.sideloaded == false);
     final nonTvApplications = _applications.values.where((application) => application.sideloaded == true);
     final defaultFavoriteLauncherPackageNames = [
-      'com.leanbitlab.ltvL',
-      'com.leanbitlab.ltvL.debug',
+      'com.omeda.arc',
+      'com.omeda.arc.debug',
     ];
 
     return _database.transaction(() async {
