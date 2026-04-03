@@ -1,16 +1,24 @@
 # ATvLauncher
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner_dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner_light.svg">
+  <img alt="LTvLauncher Banner" src="assets/banner_light.svg">
+</picture>
 
+<picture>
+  <img alt="LTvLauncher preview" src="assets/home.webp">
+</picture>
 
-
-
-[Version](https://github.com/LeanBitLab/LtvLauncher/releases/latest) [Downloads](https://github.com/LeanBitLab/LtvLauncher/releases) [Stars](https://github.com/LeanBitLab/LtvLauncher/stargazers)
+[![Version](https://img.shields.io/github/v/release/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF&label=Version)](https://github.com/LeanBitLab/LtvLauncher/releases/latest) [![Downloads](https://img.shields.io/github/downloads/LeanBitLab/LtvLauncher/total?style=for-the-badge&color=7C4DFF&label=Downloads)](https://github.com/LeanBitLab/LtvLauncher/releases) [![Stars](https://img.shields.io/github/stars/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF)](https://github.com/LeanBitLab/LtvLauncher/stargazers)
 
 **ATvLauncher** is a fork of [LTvLauncher](https://github.com/LeanBitLab/LtvLauncher) (originally by [etienn01](https://gitlab.com/flauncher/flauncher)) - an open-source alternative launcher for Android TV.
 
 This customized version introduces a modern smart TV-style grid layout, usability enhancements, and UX improvements by [meddouribadis](https://github.com/meddouribadis/LtvLauncher).
 
-
+<a href="https://github.com/LeanBitLab/LtvLauncher/releases/latest">
+  <img alt="Get it on GitHub" src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" height="50">
+</a>
 
 ## Key Features & Enhancements
 
@@ -37,26 +45,36 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 
 ## Screenshots
 
-
-|             |            |            |            |             |
-| ----------- | ---------- | ---------- | ---------- | ----------- |
-| Home Screen | Settings 1 | Settings 2 | Settings 3 | Screensaver |
-|             |            |            |            |             |
-
+<table>
+  <tr>
+    <td align="center">Home Screen</td>
+    <td align="center">Settings 1</td>
+    <td align="center">Settings 2</td>
+    <td align="center">Settings 3</td>
+    <td align="center">Screensaver</td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screenshot_1.png" width="100%" alt="Home Screen"/></td>
+    <td><img src="docs/images/screenshot_2.png" width="100%" alt="Settings 1"/></td>
+    <td><img src="docs/images/screenshot_3.png" width="100%" alt="Settings 2"/></td>
+    <td><img src="docs/images/screenshot_4.png" width="100%" alt="Settings 3"/></td>
+    <td><img src="docs/images/screensaver.gif" width="100%" alt="Screensaver"/></td>
+  </tr>
+</table>
 
 ## Original FLauncher Features
 
-- No ads
-- Customizable categories
-- Manually reorder apps within categories
-- Wallpaper support
-- Open "Android Settings"
-- Open "App info"
-- Uninstall app
-- Clock
-- Switch between row and grid for categories
-- Support for non-TV (sideloaded) apps
-- Navigation sound feedback
+- [x] No ads
+- [x] Customizable categories
+- [x] Manually reorder apps within categories
+- [x] Wallpaper support
+- [x] Open "Android Settings"
+- [x] Open "App info"
+- [x] Uninstall app
+- [x] Clock
+- [x] Switch between row and grid for categories
+- [x] Support for non-TV (sideloaded) apps
+- [x] Navigation sound feedback
 
 ## Set LTvLauncher as default launcher
 
@@ -111,7 +129,6 @@ Please note that changing wallpaper requires a file explorer to be installed on 
 
 ---
 
-### ATvLauncher
+### LTvLauncher
 
 - Customizations by [meddouribadis](https://github.com/meddouribadis)
-
