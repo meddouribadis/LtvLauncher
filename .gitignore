@@ -81,3 +81,6 @@ android/keystore.properties
 .aider*
 .antigravityignore
 .gemini/
+
+# FVM Version Cache
+.fvm/

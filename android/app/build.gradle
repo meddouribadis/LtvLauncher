@@ -53,9 +53,9 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.leanbitlab.ltvL"
+        applicationId "com.omeda.arc"
         compileSdk 35
-        minSdk 21
+        minSdkVersion flutter.minSdkVersion
         targetSdk 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -81,7 +81,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
@@ -99,7 +99,7 @@ android {
         targetCompatibility JavaVersion.VERSION_21
     }
 
-    namespace 'com.leanbitlab.ltvL'
+    namespace 'com.omeda.arc'
 
     applicationVariants.all { variant ->
         variant.outputs.all { output ->

@@ -53,18 +53,21 @@ class AppsGrid extends StatelessWidget
         primary: false,
         shrinkWrap: true,
         gridDelegate: _buildSliverGridDelegate(),
-        padding: EdgeInsets.all(16),
+        //padding: EdgeInsets.all(16),
         childrenDelegate: SliverChildBuilderDelegate(
           childCount: applications.length,
           findChildIndexCallback: _findChildIndex,
-          (context, index) => AppCard(
-              key: Key(applications[index].packageName),
-              category: category,
-              application: applications[index],
-              autofocus: index == 0,
-              handleUpNavigationToSettings: isFirstSection && index < category.columnsCount,
-              onMove: (direction) => _onMove(context, direction, index),
-              onMoveEnd: () => _saveOrder(context)
+          (context, index) => Padding(
+            key: Key(applications[index].packageName),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            child: AppCard(
+                category: category,
+                application: applications[index],
+                autofocus: index == 0,
+                handleUpNavigationToSettings: isFirstSection && index < category.columnsCount,
+                onMove: (direction) => _onMove(context, direction, index),
+                onMoveEnd: () => _saveOrder(context)
+            ),
           )
         )
       );
@@ -151,8 +154,8 @@ class AppsGrid extends StatelessWidget
   SliverGridDelegate _buildSliverGridDelegate() => SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: category.columnsCount,
         childAspectRatio: 16 / 9,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 0,
       );
 
 }

@@ -1,8 +1,9 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.compile.nullAnalysis.mode": "automatic",
-    "editor.fontSize": 16,
-    "editor.minimap.sectionHeaderFontSize": 11,
-    "debug.console.fontSize": 16,
-    "markdown.preview.fontSize": 16
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "editor.fontSize": 16,
+  "editor.minimap.sectionHeaderFontSize": 11,
+  "debug.console.fontSize": 16,
+  "markdown.preview.fontSize": 16,
+  "dart.flutterSdkPath": ".fvm/versions/3.24.5"
 }

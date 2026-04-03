@@ -41,6 +41,7 @@ class AppCard extends StatefulWidget
   final void Function(AxisDirection) onMove;
   final VoidCallback onMoveEnd;
   final bool handleUpNavigationToSettings;
+  final double scrollAlignment;
 
   const AppCard({
     super.key,
@@ -50,6 +51,7 @@ class AppCard extends StatefulWidget
     required this.onMove,
     required this.onMoveEnd,
     this.handleUpNavigationToSettings = false,
+    this.scrollAlignment = 0.5,
   });
 
   @override
@@ -61,13 +63,18 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   bool _clicked = false;
   late FocusNode _focusNode;
 
-  late Future<(AppImageType, ImageProvider)> _appImageLoadFuture;
+  // late Future<(AppImageType, ImageProvider)> _appImageLoadFuture;
+  (AppImageType, ImageProvider)? _loadedImage;
+  bool _imageLoadError = false;
+
   late final AnimationController _animation = AnimationController(
     vsync: this,
     duration: const Duration(
       milliseconds: 1200,
     ),
   );
+
+  late final CurvedAnimation _curvedAnimation =  CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
   
   AppsService? _appsService;
 
@@ -80,7 +87,8 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     _appsService!.addListener(_onAppsServiceChanged);
 
     FocusManager.instance.addHighlightModeListener(_focusHighlightModeChanged);
-    _appImageLoadFuture = _loadAppBannerOrIcon(_appsService!);
+    //_appImageLoadFuture = _loadAppBannerOrIcon(_appsService!);
+    _loadAppImage(_appsService!);
 
     // Check if we need to restore focus/reorder mode after a move
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -124,6 +132,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       _appsService!.removeListener(_onAppsServiceChanged);
     }
     FocusManager.instance.removeHighlightModeListener(_focusHighlightModeChanged);
+    _curvedAnimation.dispose();
     _animation.dispose();
     _focusNode.dispose();
 
@@ -131,20 +140,23 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   }
 
   void _onAppsServiceChanged() {
+    _loadAppImage(_appsService!);
+
     // Reload the app image when the AppsService notifies of changes
     // (e.g., after setting a custom banner)
-    setState(() {
-      _appImageLoadFuture = _loadAppBannerOrIcon(_appsService!);
-    });
+    // setState(() {
+    //   _appImageLoadFuture = _loadAppBannerOrIcon(_appsService!);
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
     final bool showAppNames = context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
+    final appImageWidget = _appImage();
 
     return FocusKeyboardListener(
-      onPressed: (key) => _onPressed(context, key),
-      onLongPress: (key) => _onLongPress(context, key),
+      onPressed: _onPressed,
+      onLongPress: _onLongPress,
       builder: (context) {
         final bool shouldHighlight = _shouldHighlight(context);
 
@@ -153,7 +165,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
           child: AnimatedOpacity(
-            opacity: _clicked ? 0.5 : 1.0,
+            opacity: _clicked ? 0.85 : 1.0,
             duration: const Duration(milliseconds: 150),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -162,15 +174,17 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
                     child: RepaintBoundary(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+                      child: AnimatedScale(
+                        scale: !_moving && shouldHighlight ? 1.2 : 1.0,
+                        duration: const Duration(milliseconds: 150),
+                        alignment: Alignment.center,
                         curve: Curves.easeInOut,
-                        transformAlignment: Alignment.center,
-                        transform: _scaleTransform(context),
+                        //transformAlignment: Alignment.center,
+                        //transform: _scaleTransform(context),
                         child: Material(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           clipBehavior: Clip.antiAlias,
-                          elevation: shouldHighlight ? 16 : 0,
+                          elevation: shouldHighlight ? 16 : 4,
                           shadowColor: Colors.black,
                           child: Stack(
                             fit: StackFit.expand,
@@ -179,9 +193,9 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                 focusNode: _focusNode,
                                 autofocus: widget.autofocus,
                                 focusColor: Colors.transparent,
-                                child: _appImage(),
-                                onTap: () => _onPressed(context, LogicalKeyboardKey.enter),
-                                onLongPress: () => _onLongPress(context, LogicalKeyboardKey.enter),
+                                child: appImageWidget,
+                                onTap: () => _onPressed(LogicalKeyboardKey.enter),
+                                onLongPress: () => _onLongPress(LogicalKeyboardKey.enter),
                                 onFocusChange: (focused) {
                                   Scrollable.ensureVisible(
                                     context,
@@ -191,20 +205,36 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                     // title to be hidden by the content above it when
                                     // scrolling from the app bar. How it relates to this,
                                     // I don't know
-                                    alignment: 0.5,
+                                    alignment: widget.scrollAlignment,
                                     curve: Curves.easeInOut,
-                                    duration: Duration(milliseconds: 100)
+                                    duration: const Duration(milliseconds: 300)
                                   );
                                 },
 
                               ),
                               if (_moving) ..._arrows(),
+                              // const IgnorePointer(
+                              //   child: DecoratedBox(
+                              //     decoration: BoxDecoration(
+                              //       gradient: LinearGradient(
+                              //         begin: Alignment.topCenter,
+                              //         end: Alignment.bottomCenter,
+                              //         stops: [0.0, 0.5, 1.0],
+                              //         colors: [
+                              //           Color(0x1AFFFFFF),
+                              //           Color(0xDFFFFFF),
+                              //           Colors.black12,
+                              //         ],
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
                               IgnorePointer(
                                 child: AnimatedOpacity(
                                   duration: const Duration(milliseconds: 200),
                                   curve: Curves.easeInOut,
-                                  opacity: shouldHighlight ? 0 : 0.10,
-                                  child: Container(color: Colors.black),
+                                  opacity: shouldHighlight ? 0.0 : 1.0,
+                                  child: const ColoredBox(color: Color(0x1A000000)),
                                 ),
                               ),
                               Selector<SettingsService, (bool, String)>(
@@ -217,70 +247,74 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                     if (animationEnabled) {
                                       _animation.repeat(reverse: true);
                                       return AnimatedBuilder(
-                                        animation: CurvedAnimation(parent: _animation, curve: Curves.easeInOut),
+                                        animation: _curvedAnimation,
                                         builder: (context, child) {
                                           final opacity = 0.4 + (_animation.value * 0.6);
 
                                           return IgnorePointer(
-                                            child: Stack(
-                                              fit: StackFit.expand,
-                                              children: [
-                                                // Outer outline (Accent Color)
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    border: Border.all(
-                                                      color: accentColor.withOpacity(opacity),
-                                                      width: 2
-                                                    ),
-                                                  ),
-                                                ),
-                                                // Inner outline (Black)
-                                                Padding(
-                                                  padding: const EdgeInsets.all(2),
-                                                  child: Container(
+                                            child: RepaintBoundary(
+                                              child: Stack(
+                                                fit: StackFit.expand,
+                                                children: [
+                                                  // Outer outline (Accent Color)
+                                                  Container(
                                                     decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(6),
+                                                      borderRadius: BorderRadius.circular(12),
                                                       border: Border.all(
-                                                        color: Colors.black.withOpacity(opacity),
-                                                        width: 2
+                                                        color: accentColor.withOpacity(opacity),
+                                                        width: 1
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
+                                                  // Inner outline (Black)
+                                                  //Padding(
+                                                  //  padding: const EdgeInsets.all(2),
+                                                  //  child: Container(
+                                                  //    decoration: BoxDecoration(
+                                                  //      borderRadius: BorderRadius.circular(6),
+                                                  //      border: Border.all(
+                                                  //        color: Colors.black.withOpacity(opacity),
+                                                  //        width: 2
+                                                  //      ),
+                                                  //    ),
+                                                  //  ),
+                                                  //),
+                                                ],
+                                              ),
+                                            )
                                           );
                                         },
                                       );
                                     } else {
                                       _animation.stop();
                                       return IgnorePointer(
-                                        child: Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(8),
-                                                border: Border.all(
-                                                  color: accentColor,
-                                                  width: 2
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(2),
-                                              child: Container(
+                                        child: RepaintBoundary(
+                                          child :Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              DecoratedBox(
                                                 decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  borderRadius: BorderRadius.circular(12),
                                                   border: Border.all(
-                                                    color: Colors.black,
-                                                    width: 2
+                                                    color: accentColor,
+                                                    width: 1
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                              // Padding(
+                                              //   padding: const EdgeInsets.all(2),
+                                              //   child: DecoratedBox(
+                                              //     decoration: BoxDecoration(
+                                              //       borderRadius: BorderRadius.circular(6),
+                                              //       border: Border.all(
+                                              //         color: Colors.black,
+                                              //         width: 2
+                                              //       ),
+                                              //     ),
+                                              //   ),
+                                              // ),
+                                            ],
+                                          ),
                                         ),
                                       );
                                     }
@@ -327,79 +361,162 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       bytes = await service.getAppIcon(widget.application.packageName);
     }
 
-    return (type, MemoryImage(bytes));
+    return (type, ResizeImage(MemoryImage(bytes), width: 480));
   }
+
+  Future<void> _loadAppImage(AppsService service) async {
+    try {
+      Uint8List bytes = Uint8List(0);
+
+      bytes = await service.getAppBanner(widget.application.packageName);
+      AppImageType type = AppImageType.Banner;
+      if (bytes.isEmpty) {
+        type = AppImageType.Icon;
+        bytes = await service.getAppIcon(widget.application.packageName);
+      }
+      if (mounted) {
+        setState(() {
+          _loadedImage = (type, ResizeImage(MemoryImage(bytes), width: 480));
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _imageLoadError = true);
+      }
+    }
+}
 
   Widget _appImage()
   {
     App app = widget.application;
 
-    return FutureBuilder(
-      future: _appImageLoadFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          (AppImageType, ImageProvider) record = snapshot.data!;
-
-          if (record.$1 == AppImageType.Banner) {
-            return Ink.image(image: record.$2, fit: BoxFit.cover);
-          }
-          else {
-            return Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Ink.image(
-                      image: record.$2,
-                      height: double.maxFinite,
-                    ),
-                  ),
-                  Flexible(
-                    flex: 3,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Text(
-                        app.name,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 3,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-        }
-        else if (snapshot.hasError) {
-          return Padding(
-            padding: const EdgeInsets.all(8),
-            child: Center(
-              child: Text(
-                app.name,
-                style: Theme.of(context).textTheme.bodySmall,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 3,
-              )
-            ),
-          );
-        }
-        else {
-          return const Padding(
-            padding: EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 0, width: 16),
-                Text("Loading")
-              ],
-            ),
-          );
-        }
+    if(_loadedImage != null) {
+      final (type, image) = _loadedImage!;
+      if (type == AppImageType.Banner) {
+        return Ink.image(image: image, fit: BoxFit.cover);
       }
-    );
+      else {
+        return Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Ink.image(
+                  image: image,
+                  height: double.maxFinite,
+                ),
+              ),
+              Flexible(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Text(
+                    app.name,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    else if (_imageLoadError) {
+      return Padding(
+        padding: const EdgeInsets.all(8),
+        child: Center(
+            child: Text(
+              app.name,
+              style: Theme.of(context).textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 3,
+            )
+        ),
+      );
+    }
+    else {
+      return const Padding(
+        padding: EdgeInsets.all(8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 0, width: 16),
+            Text("Loading")
+          ],
+        ),
+      );
+    }
+    // Old way to load app images
+    // return FutureBuilder(
+    //   future: _appImageLoadFuture,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.hasData) {
+    //       (AppImageType, ImageProvider) record = snapshot.data!;
+    //
+    //       if (record.$1 == AppImageType.Banner) {
+    //         return Ink.image(image: record.$2, fit: BoxFit.cover);
+    //       }
+    //       else {
+    //         return Padding(
+    //           padding: const EdgeInsets.all(8),
+    //           child: Row(
+    //             children: [
+    //               Expanded(
+    //                 flex: 2,
+    //                 child: Ink.image(
+    //                   image: record.$2,
+    //                   height: double.maxFinite,
+    //                 ),
+    //               ),
+    //               Flexible(
+    //                 flex: 3,
+    //                 child: Padding(
+    //                   padding: const EdgeInsets.only(left: 8),
+    //                   child: Text(
+    //                     app.name,
+    //                     style: Theme.of(context).textTheme.bodySmall,
+    //                     overflow: TextOverflow.ellipsis,
+    //                     maxLines: 3,
+    //                   ),
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         );
+    //       }
+    //     }
+    //     else if (snapshot.hasError) {
+    //       return Padding(
+    //         padding: const EdgeInsets.all(8),
+    //         child: Center(
+    //           child: Text(
+    //             app.name,
+    //             style: Theme.of(context).textTheme.bodySmall,
+    //             overflow: TextOverflow.ellipsis,
+    //             maxLines: 3,
+    //           )
+    //         ),
+    //       );
+    //     }
+    //     else {
+    //       return const Padding(
+    //         padding: EdgeInsets.all(8),
+    //         child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: [
+    //             CircularProgressIndicator(),
+    //             SizedBox(height: 0, width: 16),
+    //             Text("Loading")
+    //           ],
+    //         ),
+    //       );
+    //     }
+    //   }
+    // );
   }
 
   void _focusHighlightModeChanged(FocusHighlightMode mode)
@@ -463,11 +580,11 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         )
       );
 
-  KeyEventResult _onPressed(BuildContext context, LogicalKeyboardKey? key) {
+  KeyEventResult _onPressed(LogicalKeyboardKey? key) {
     if (_moving) {
 
       WidgetsBinding.instance.addPostFrameCallback((_) => Scrollable.ensureVisible(context,
-          alignment: 0.1, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut));
+          alignment: 0.1, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut));
       if (key == LogicalKeyboardKey.arrowLeft) {
 
         widget.onMove(AxisDirection.left);
@@ -511,15 +628,15 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     return KeyEventResult.ignored;
   }
 
-  KeyEventResult _onLongPress(BuildContext context, LogicalKeyboardKey? key) {
+  KeyEventResult _onLongPress(LogicalKeyboardKey? key) {
     if (!_moving && (key == null || longPressableKeys.contains(key))) {
-      _showPanel(context);
+      _showPanel();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
 
-  Future<void> _showPanel(BuildContext context) async {
+  Future<void> _showPanel() async {
     final result = await showDialog<ApplicationInfoPanelResult>(
       context: context,
       builder: (context) => ApplicationInfoPanel(

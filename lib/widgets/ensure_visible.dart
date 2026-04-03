@@ -38,7 +38,7 @@ class EnsureVisible extends StatelessWidget {
               alignment: alignment,
               alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
               curve: Curves.easeOut,
-              duration: Duration(milliseconds: 50)
+              duration: const Duration(milliseconds: 300)
             );
           }
         },

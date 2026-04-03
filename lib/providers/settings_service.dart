@@ -39,6 +39,7 @@ const _showWifiWidgetInStatusBar = "show_wifi_widget_in_status_bar";
 const String _showNetworkIndicatorInStatusBar = "show_network_indicator_in_status_bar";
 const String _accentColor = "accent_color";
 const String _screensaverClockStyle = "screensaver_clock_style";
+const String _dockBackdropFilterDisabled = "dock_backdrop_filter_disabled";
 
 // WiFi usage period options
 const String WIFI_USAGE_DAILY = "daily";
@@ -68,17 +69,17 @@ class SettingsService extends ChangeNotifier {
   final SharedPreferences _sharedPreferences;
 
 
-  bool get appHighlightAnimationEnabled => _sharedPreferences.getBool(_appHighlightAnimationEnabledKey) ?? true;
+  bool get appHighlightAnimationEnabled => _sharedPreferences.getBool(_appHighlightAnimationEnabledKey) ?? false;
 
   bool get appKeyClickEnabled => _sharedPreferences.getBool(_appKeyClickEnabledKey) ?? true;
 
   bool get autoHideAppBarEnabled => _sharedPreferences.getBool(_autoHideAppBar) ?? false;
 
-  bool get showCategoryTitles => _sharedPreferences.getBool(_showCategoryTitles) ?? true;
+  bool get showCategoryTitles => _sharedPreferences.getBool(_showCategoryTitles) ?? false;
 
   bool get showAppNamesBelowIcons => _sharedPreferences.getBool(_showAppNamesBelowIcons) ?? false;
 
-  bool get showDateInStatusBar => _sharedPreferences.getBool(_showDateInStatusBar) ?? true;
+  bool get showDateInStatusBar => _sharedPreferences.getBool(_showDateInStatusBar) ?? false;
 
   bool get showTimeInStatusBar => _sharedPreferences.getBool(_showTimeInStatusBar) ?? true;
 
@@ -92,13 +93,15 @@ class SettingsService extends ChangeNotifier {
 
   String get wifiUsagePeriod => _sharedPreferences.getString(_wifiUsagePeriod) ?? WIFI_USAGE_DAILY;
 
-  bool get showWifiWidgetInStatusBar => _sharedPreferences.getBool(_showWifiWidgetInStatusBar) ?? true;
+  bool get showWifiWidgetInStatusBar => _sharedPreferences.getBool(_showWifiWidgetInStatusBar) ?? false;
 
   bool get showNetworkIndicatorInStatusBar => _sharedPreferences.getBool(_showNetworkIndicatorInStatusBar) ?? true;
 
-  String get accentColorHex => _sharedPreferences.getString(_accentColor) ?? ACCENT_COLOR_PURPLE;
+  String get accentColorHex => _sharedPreferences.getString(_accentColor) ?? ACCENT_COLOR_WHITE;
 
   String get screensaverClockStyle => _sharedPreferences.getString(_screensaverClockStyle) ?? "minimal";
+
+  bool get dockBackdropFilterDisabled => _sharedPreferences.getBool(_dockBackdropFilterDisabled) ?? false;
 
   Color get accentColor {
     final hex = accentColorHex;
@@ -181,6 +184,10 @@ class SettingsService extends ChangeNotifier {
   Future<void> setScreensaverClockStyle(String style) async {
     await _sharedPreferences.setString(_screensaverClockStyle, style);
     notifyListeners();
+  }
+
+  Future<void> setDockBackdropFilterDisabled(bool value) async {
+    return set(_dockBackdropFilterDisabled, value);
   }
 
   bool get timeBasedWallpaperEnabled => _sharedPreferences.getBool("time_based_wallpaper_enabled") ?? false;

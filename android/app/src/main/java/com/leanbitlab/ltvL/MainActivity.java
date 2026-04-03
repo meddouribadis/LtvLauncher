@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.leanbitlab.ltvL;
+package com.omeda.arc;
 
 import android.content.Context;
 import android.content.Intent;

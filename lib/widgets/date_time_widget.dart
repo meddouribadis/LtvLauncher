@@ -34,7 +34,7 @@ class DateTimeWidget extends StatefulWidget {
     super.key,
     this.updateInterval,
     this.textStyle,
-    this.animate = true,
+    this.animate = false,
   }) :
       _dateTimeFormatString = dateTimeFormatString;
 

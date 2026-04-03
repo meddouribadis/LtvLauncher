@@ -1,4 +1,4 @@
-package com.leanbitlab.ltvL;
+package com.omeda.arc;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

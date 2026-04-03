@@ -48,6 +48,12 @@ class MiscPanelPage extends StatelessWidget {
                 title: Text("Show App Names Below Icons", style: Theme.of(context).textTheme.bodyMedium),
                 secondary: Icon(Icons.subtitles),
               ),
+              RoundedSwitchListTile(
+                value: settingsService.dockBackdropFilterDisabled,
+                onChanged: (value) => settingsService.setDockBackdropFilterDisabled(value),
+                title: Text("Disable Dock Backdrop Blur", style: Theme.of(context).textTheme.bodyMedium),
+                secondary: Icon(Icons.blur_off),
+              ),
             ],
           ),
         ),
