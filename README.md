@@ -3,11 +3,11 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/banner_dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/banner_light.svg">
-  <img alt="LTvLauncher Banner" src="assets/banner_light.svg">
+  <img alt="ATvLauncher Banner" src="assets/banner_light.svg">
 </picture>
 
 <picture>
-  <img alt="LTvLauncher preview" src="assets/home.webp">
+  <img alt="ATvLauncher preview" src="assets/home.webp">
 </picture>
 
 [![Version](https://img.shields.io/github/v/release/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF&label=Version)](https://github.com/LeanBitLab/LtvLauncher/releases/latest) [![Downloads](https://img.shields.io/github/downloads/LeanBitLab/LtvLauncher/total?style=for-the-badge&color=7C4DFF&label=Downloads)](https://github.com/LeanBitLab/LtvLauncher/releases) [![Stars](https://img.shields.io/github/stars/LeanBitLab/LtvLauncher?style=for-the-badge&color=7C4DFF)](https://github.com/LeanBitLab/LtvLauncher/stargazers)
@@ -50,9 +50,9 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 
 <table>
   <tr>
-    <td align="center">Settings 1</td>
-    <td align="center">Settings 2</td>
-    <td align="center">Settings 3</td>
+    <td align="center">Settings panel</td>
+    <td align="center">Accent colors</td>
+    <td align="center">Multiple wallpapers</td>
   </tr>
   <tr>
     <td><img src="assets/screen_settings1.png" width="100%" alt="Settings screen 1"/></td>
@@ -60,9 +60,9 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
     <td><img src="assets/screen_settings3.png" width="100%" alt="Settings screen 3"/></td>
   </tr>
   <tr>
-    <td align="center">Settings 4</td>
-    <td align="center">Settings 5</td>
-    <td align="center">Settings 6</td>
+    <td align="center">Disable blur</td>
+    <td align="center">Disabled blur</td>
+    <td align="center">Custom banner</td>
   </tr>
   <tr>
     <td><img src="assets/screen_settings4.png" width="100%" alt="Settings screen 4"/></td>
@@ -104,11 +104,11 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 - [x] Support for non-TV (sideloaded) apps
 - [x] Navigation sound feedback
 
-## Set LTvLauncher as default launcher
+## Set ATvLauncher as default launcher
 
 ### Method 1: Remap the Home button
 
-This is the "safer" and easiest way. Use [Button Mapper](https://play.google.com/store/apps/details?id=flar2.homebutton) to remap the Home button of the remote to launch LTvLauncher.
+This is the "safer" and easiest way. Use [Button Mapper](https://play.google.com/store/apps/details?id=flar2.homebutton) to remap the Home button of the remote to launch ATvLauncher.
 
 ### Method 2: Disable the default launcher
 
