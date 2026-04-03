@@ -233,7 +233,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                                 child: AnimatedOpacity(
                                   duration: const Duration(milliseconds: 200),
                                   curve: Curves.easeInOut,
-                                  opacity: shouldHighlight ? 0.0 : 1.3,
+                                  opacity: shouldHighlight ? 0.0 : 1.0,
                                   child: const ColoredBox(color: Color(0x1A000000)),
                                 ),
                               ),

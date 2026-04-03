@@ -218,6 +218,10 @@ class AppsService extends ChangeNotifier
   Future<void> _initDefaultCategories() {
     final tvApplications = _applications.values.where((application) => application.sideloaded == false);
     final nonTvApplications = _applications.values.where((application) => application.sideloaded == true);
+    final defaultFavoriteLauncherPackageNames = [
+      'com.leanbitlab.ltvL',
+      'com.leanbitlab.ltvL.debug',
+    ];
 
     return _database.transaction(() async {
       if (nonTvApplications.isNotEmpty) {
@@ -241,7 +245,14 @@ class AppsService extends ChangeNotifier
         }
       }
 
-      await addCategory("Favorites", shouldNotifyListeners: false);
+      final int favoritesId = await addCategory("Favorites", shouldNotifyListeners: false);
+      final Category favoritesCategory = _categoriesById[favoritesId]!;
+      for (final packageName in defaultFavoriteLauncherPackageNames) {
+        final app = _applications[packageName];
+        if (app != null && !app.hidden) {
+          await addToCategory(app, favoritesCategory, shouldNotifyListeners: false);
+        }
+      }
     });
   }
 
