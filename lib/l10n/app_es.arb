@@ -45,6 +45,7 @@
         }
     },
     "gradient": "Gradiente",
+    "favoriteApps": "Favoritas",
     "grid": "Cuadrícula",
     "height": "Altura",
     "hide": "Ocultar",
@@ -99,5 +100,8 @@
     "typeInTheHourFormat": "Escriba el formato de hora",
     "uninstall": "Desinstalar",
     "wallpaper": "Fondo de pantalla",
-    "withEllipsisAddTo": "Añadir a..."
+    "withEllipsisAddTo": "Añadir a...",
+    "timeBasedWallpaper": "Fondo de pantalla según la hora",
+    "pickDayWallpaper": "Elegir fondo de día",
+    "pickNightWallpaper": "Elegir fondo de noche"
 }
