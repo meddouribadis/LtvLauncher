@@ -69,6 +69,18 @@ android {
                 storePassword localProperties['storePassword']
                 keyAlias localProperties['keyAlias']
                 keyPassword localProperties['keyPassword']
+            } else if (file('upload-keystore.jks').exists()) {
+                def storePass = System.getenv('SIGNING_KEYSTORE_PASSWORD')
+                def alias = System.getenv('SIGNING_KEY_ALIAS')
+                def keyPass = System.getenv('SIGNING_KEY_PASSWORD')
+                if (storePass == null || alias == null || keyPass == null) {
+                    throw new Exception(
+                            'upload-keystore.jks is present but SIGNING_KEYSTORE_PASSWORD, SIGNING_KEY_ALIAS, and SIGNING_KEY_PASSWORD must be set')
+                }
+                storeFile file('upload-keystore.jks')
+                storePassword storePass
+                keyAlias alias
+                keyPassword keyPass
             }
         }
     }
@@ -105,9 +117,9 @@ android {
         variant.outputs.all { output ->
             def abi = output.getFilter(com.android.build.OutputFile.ABI)
             if (abi != null) {
-                outputFileName = "LTvLauncher-${abi}-${variant.buildType.name}.apk"
+                outputFileName = "arc-launcher-${abi}-${variant.buildType.name}.apk"
             } else {
-                outputFileName = "LTvLauncher-universal-${variant.buildType.name}.apk"
+                outputFileName = "arc-launcher-universal-${variant.buildType.name}.apk"
             }
         }
     }
