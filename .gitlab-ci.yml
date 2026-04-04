@@ -153,6 +153,7 @@ deploy:gitlab-release:
 
 deploy:play-store:
   stage: deploy
+  when: manual
   needs:
     - job: commitlint
       optional: true
