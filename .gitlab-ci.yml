@@ -1,11 +1,15 @@
+variables:
+  FLUTTER_DOCKER_IMAGE: cirrusci/flutter:3.7.5
+
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
     - if: $CI_PIPELINE_SOURCE == "api"
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: always
     - when: never
-
-variables:
-  FLUTTER_DOCKER_IMAGE: cirrusci/flutter:3.7.5
 
 stages:
   - precheck
@@ -24,9 +28,10 @@ commitlint:
   stage: precheck
   needs: [ ]
   script:
-    - commitlint --from origin/master --verbose
+    - commitlint --from origin/main --verbose
   except:
     - master
+    - main
 
 stylelint:
   image: $FLUTTER_DOCKER_IMAGE
@@ -62,6 +67,7 @@ build:appbundle:debug:
   needs: [ ]
   except:
     - master
+    - main
     - tags
   script:
     - flutter build appbundle --debug
@@ -72,6 +78,7 @@ build:appbundle:release:
   needs: [ ]
   only:
     - master
+    - main
     - tags
   before_script:
     - echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
