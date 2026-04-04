@@ -1,5 +1,7 @@
 variables:
   FLUTTER_DOCKER_IMAGE: ghcr.io/cirruslabs/flutter:3.24.5
+  GITLAB_GENERIC_PACKAGE_NAME: arclauncher
+  RELEASE_APK_FILENAME_PREFIX: arclauncher
 
 workflow:
   rules:
@@ -97,7 +99,12 @@ build:appbundle:release:
     - tags
   before_script:
     - echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-    - echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
+    - |
+      test -n "${SIGNING_JKS_FILE_BASE64:-}" || { echo "SIGNING_JKS_FILE_BASE64 is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEYSTORE_PASSWORD:-}" || { echo "SIGNING_KEYSTORE_PASSWORD is empty or unset (check GitLab variable + Protected / branch)"; exit 1; }
+      test -n "${SIGNING_KEY_ALIAS:-}" || { echo "SIGNING_KEY_ALIAS is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEY_PASSWORD:-}" || { echo "SIGNING_KEY_PASSWORD is empty or unset"; exit 1; }
+      echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
     - if [ -n "$CI_COMMIT_TAG" ]; then BUILD_NAME=$CI_COMMIT_TAG; else BUILD_NAME=$CI_COMMIT_SHORT_SHA; fi
   script:
     - flutter build appbundle --release --build-number=$CI_PIPELINE_IID --build-name=$BUILD_NAME
@@ -106,13 +113,19 @@ build:appbundle:release:
       - build/app/outputs/bundle/release/app-release.aab
 
 build:apk:
-  image: openjdk:16-buster
+  image: eclipse-temurin:17-jdk-jammy
   stage: transform
   needs: [ "build:appbundle:release" ]
   only:
     - tags
   before_script:
-    - echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
+    - apt-get update && apt-get install -y --no-install-recommends wget unzip && rm -rf /var/lib/apt/lists/*
+    - |
+      test -n "${SIGNING_JKS_FILE_BASE64:-}" || { echo "SIGNING_JKS_FILE_BASE64 is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEYSTORE_PASSWORD:-}" || { echo "SIGNING_KEYSTORE_PASSWORD is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEY_ALIAS:-}" || { echo "SIGNING_KEY_ALIAS is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEY_PASSWORD:-}" || { echo "SIGNING_KEY_PASSWORD is empty or unset"; exit 1; }
+      echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
     - wget https://github.com/google/bundletool/releases/download/1.6.1/bundletool-all-1.6.1.jar -O bundletool.jar
   script:
     - java -jar bundletool.jar build-apks --mode=universal --bundle=build/app/outputs/bundle/release/app-release.aab --output=app-release.apks --ks=android/app/upload-keystore.jks --ks-pass=pass:$SIGNING_KEYSTORE_PASSWORD --ks-key-alias=$SIGNING_KEY_ALIAS --key-pass=pass:$SIGNING_KEY_PASSWORD
@@ -138,10 +151,11 @@ deploy:gitlab-release:
   only:
     - tags
   script:
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file app-release.apk "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/flauncher/$CI_COMMIT_TAG/flauncher-$CI_COMMIT_TAG.apk"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file app-release.apk "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${GITLAB_GENERIC_PACKAGE_NAME}/$CI_COMMIT_TAG/${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk"'
 
 deploy:play-store:
   stage: deploy
+  when: manual
   needs:
     - job: commitlint
       optional: true
@@ -191,10 +205,10 @@ promote:gitlab-release:
     - echo 'running promote:gitlab-release'
   release:
     name: $CI_COMMIT_TAG
-    description: FLauncher v$CI_COMMIT_TAG
+    description: Arc Launcher v$CI_COMMIT_TAG
     tag_name: $CI_COMMIT_TAG
     assets:
       links:
-        - name: flauncher-$CI_COMMIT_TAG.apk
-          url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/flauncher/$CI_COMMIT_TAG/flauncher-$CI_COMMIT_TAG.apk
-          filepath: /flauncher-$CI_COMMIT_TAG.apk
+        - name: ${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk
+          url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${GITLAB_GENERIC_PACKAGE_NAME}/$CI_COMMIT_TAG/${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk
+          filepath: /${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk
