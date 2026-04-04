@@ -1,5 +1,7 @@
 variables:
   FLUTTER_DOCKER_IMAGE: ghcr.io/cirruslabs/flutter:3.24.5
+  GITLAB_GENERIC_PACKAGE_NAME: arclauncher
+  RELEASE_APK_FILENAME_PREFIX: arclauncher
 
 workflow:
   rules:
@@ -149,7 +151,7 @@ deploy:gitlab-release:
   only:
     - tags
   script:
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file app-release.apk "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/flauncher/$CI_COMMIT_TAG/flauncher-$CI_COMMIT_TAG.apk"'
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file app-release.apk "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${GITLAB_GENERIC_PACKAGE_NAME}/$CI_COMMIT_TAG/${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk"'
 
 deploy:play-store:
   stage: deploy
@@ -203,10 +205,10 @@ promote:gitlab-release:
     - echo 'running promote:gitlab-release'
   release:
     name: $CI_COMMIT_TAG
-    description: FLauncher v$CI_COMMIT_TAG
+    description: Arc Launcher v$CI_COMMIT_TAG
     tag_name: $CI_COMMIT_TAG
     assets:
       links:
-        - name: flauncher-$CI_COMMIT_TAG.apk
-          url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/flauncher/$CI_COMMIT_TAG/flauncher-$CI_COMMIT_TAG.apk
-          filepath: /flauncher-$CI_COMMIT_TAG.apk
+        - name: ${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk
+          url: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${GITLAB_GENERIC_PACKAGE_NAME}/$CI_COMMIT_TAG/${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk
+          filepath: /${RELEASE_APK_FILENAME_PREFIX}-$CI_COMMIT_TAG.apk
