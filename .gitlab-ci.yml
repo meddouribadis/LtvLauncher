@@ -1,5 +1,5 @@
 variables:
-  FLUTTER_DOCKER_IMAGE: cirrusci/flutter:3.7.5
+  FLUTTER_DOCKER_IMAGE: ghcr.io/cirruslabs/flutter:3.24.5
 
 workflow:
   rules:
@@ -27,11 +27,14 @@ commitlint:
     entrypoint: [ "" ]
   stage: precheck
   needs: [ ]
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"
+      when: never
+    - when: on_success
   script:
     - commitlint --from origin/main --verbose
-  except:
-    - master
-    - main
 
 stylelint:
   image: $FLUTTER_DOCKER_IMAGE
@@ -110,7 +113,13 @@ build:apk:
 deploy:gitlab-release:
   image: curlimages/curl:latest
   stage: deploy
-  needs: [ "commitlint", "stylelint", "analyze", "test", "build:apk" ]
+  needs:
+    - job: commitlint
+      optional: true
+    - stylelint
+    - analyze
+    - test
+    - build:apk
   only:
     - tags
   script:
@@ -118,7 +127,13 @@ deploy:gitlab-release:
 
 deploy:play-store:
   stage: deploy
-  needs: [ "commitlint", "stylelint", "analyze", "test", "build:appbundle:release" ]
+  needs:
+    - job: commitlint
+      optional: true
+    - stylelint
+    - analyze
+    - test
+    - build:appbundle:release
   image: ruby:2.6.3
   only:
     - tags
