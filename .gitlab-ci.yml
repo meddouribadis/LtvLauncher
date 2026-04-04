@@ -97,7 +97,12 @@ build:appbundle:release:
     - tags
   before_script:
     - echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-    - echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
+    - |
+      test -n "${SIGNING_JKS_FILE_BASE64:-}" || { echo "SIGNING_JKS_FILE_BASE64 is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEYSTORE_PASSWORD:-}" || { echo "SIGNING_KEYSTORE_PASSWORD is empty or unset (check GitLab variable + Protected / branch)"; exit 1; }
+      test -n "${SIGNING_KEY_ALIAS:-}" || { echo "SIGNING_KEY_ALIAS is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEY_PASSWORD:-}" || { echo "SIGNING_KEY_PASSWORD is empty or unset"; exit 1; }
+      echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
     - if [ -n "$CI_COMMIT_TAG" ]; then BUILD_NAME=$CI_COMMIT_TAG; else BUILD_NAME=$CI_COMMIT_SHORT_SHA; fi
   script:
     - flutter build appbundle --release --build-number=$CI_PIPELINE_IID --build-name=$BUILD_NAME
@@ -106,13 +111,19 @@ build:appbundle:release:
       - build/app/outputs/bundle/release/app-release.aab
 
 build:apk:
-  image: openjdk:16-buster
+  image: eclipse-temurin:17-jdk-jammy
   stage: transform
   needs: [ "build:appbundle:release" ]
   only:
     - tags
   before_script:
-    - echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
+    - apt-get update && apt-get install -y --no-install-recommends wget unzip && rm -rf /var/lib/apt/lists/*
+    - |
+      test -n "${SIGNING_JKS_FILE_BASE64:-}" || { echo "SIGNING_JKS_FILE_BASE64 is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEYSTORE_PASSWORD:-}" || { echo "SIGNING_KEYSTORE_PASSWORD is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEY_ALIAS:-}" || { echo "SIGNING_KEY_ALIAS is empty or unset"; exit 1; }
+      test -n "${SIGNING_KEY_PASSWORD:-}" || { echo "SIGNING_KEY_PASSWORD is empty or unset"; exit 1; }
+      echo -n "$SIGNING_JKS_FILE_BASE64" | base64 -d > android/app/upload-keystore.jks
     - wget https://github.com/google/bundletool/releases/download/1.6.1/bundletool-all-1.6.1.jar -O bundletool.jar
   script:
     - java -jar bundletool.jar build-apks --mode=universal --bundle=build/app/outputs/bundle/release/app-release.aab --output=app-release.apks --ks=android/app/upload-keystore.jks --ks-pass=pass:$SIGNING_KEYSTORE_PASSWORD --ks-key-alias=$SIGNING_KEY_ALIAS --key-pass=pass:$SIGNING_KEY_PASSWORD
