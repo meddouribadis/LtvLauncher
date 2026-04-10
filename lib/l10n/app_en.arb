@@ -1,5 +1,5 @@
 {
-    "aboutFlauncher": "About LTvLauncher",
+    "aboutFlauncher": "About Arc Launcher",
     "addCategory": "Add category",
     "addSection": "Add section",
     "alphabetical": "Alphabetical",
@@ -84,7 +84,7 @@
     "showCategoryTitles": "Show category titles",
     "sort": "Sort",
     "systemSettings": "System settings",
-    "textAboutDialog": "LTvLauncher is a customized open-source launcher for Android TV, based on FLauncher.\n\nDeveloped by LeanBitLab.\nSource code available at {repoUrl}.",
+    "textAboutDialog": "Arc Launcher is a customized open-source launcher for Android TV, based on FLauncher.\n\nDeveloped by LeanBitLab.\nSource code available at {repoUrl}.",
     "@textAboutDialog": {
         "placeholders": {
             "repoUrl": {
