@@ -27,10 +27,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/category.dart';
 
 // Section name presets for TV remote-friendly selection
-// First 2 are special auto-populating categories
 const List<String> sectionNamePresets = [
-  'TV Apps',             // Auto: non-sideloaded apps
-  'Non-TV Apps',         // Auto: sideloaded apps
+  'All Apps',            // Auto: all non-hidden apps
   'Movies & Shows',
   'Music',
   'Games',
@@ -599,7 +597,7 @@ class _CategorySettingsState extends State<_CategorySettings>
       );
 
       // Auto-populate special categories
-      if (_name == 'TV Apps' || _name == 'Non-TV Apps') {
+      if (_name == 'All Apps') {
         try {
           // Find the actual category object using the ID we just got
           final createdCategory = service.categories.firstWhere((c) => c.id == categoryId);

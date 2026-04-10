@@ -45,10 +45,9 @@ class _ApplicationsPanelPageState extends State<ApplicationsPanelPage> {
   bool _isSwitchingViaKeyboard = false;
 
   final List<_TabData> _tabs = [
-    _TabData(0, Icons.tv, (l) => l.tvApplications),
-    _TabData(1, Icons.android, (l) => l.nonTvApplications),
-    _TabData(2, Icons.star, (l) => l.favoriteApps),
-    _TabData(3, Icons.visibility_off_outlined, (l) => l.hiddenApplications),
+    _TabData(0, Icons.apps, (l) => l.allApplications),
+    _TabData(1, Icons.star, (l) => l.favoriteApps),
+    _TabData(2, Icons.visibility_off_outlined, (l) => l.hiddenApplications),
   ];
   
   late List<FocusNode> _tabFocusNodes;
@@ -198,10 +197,9 @@ class _ApplicationsPanelPageState extends State<ApplicationsPanelPage> {
   Widget _buildCurrentTab() {
      // ... (same)
     switch (_selectedIndex) {
-      case 0: return _TVTab();
-      case 1: return _SideloadedTab();
-      case 2: return _FavoritesTab();
-      case 3: return _HiddenTab();
+      case 0: return _AllAppsTab();
+      case 1: return _FavoritesTab();
+      case 2: return _HiddenTab();
       default: return Container();
     }
   }
@@ -248,32 +246,10 @@ class ChangeTabAction extends Action<ChangeTabIntent> {
 }
 
 
-class _TVTab extends StatelessWidget {
+class _AllAppsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Selector<AppsService, List<App>>(
-        selector: (_, appsService) => appsService.applications.where((app) => !app.sideloaded && !app.hidden).toList(),
-        builder: (context, applications, _) {
-          if (applications.isEmpty) {
-            return const _EmptyListPlaceholder("No applications found", autofocus: true);
-          }
-          return ListView(
-            children: applications
-                .asMap()
-                .entries
-                .map((entry) => EnsureVisible(
-                      alignment: 0.5,
-                      child: _AppListItem(entry.value, autofocus: entry.key == 0, isFirst: entry.key == 0),
-                    ))
-                .toList(),
-          );
-        },
-      );
-}
-
-class _SideloadedTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Selector<AppsService, List<App>>(
-        selector: (_, appsService) => appsService.applications.where((app) => app.sideloaded && !app.hidden).toList(),
+        selector: (_, appsService) => appsService.applications.where((app) => !app.hidden).toList(),
         builder: (context, applications, _) {
           if (applications.isEmpty) {
             return const _EmptyListPlaceholder("No applications found", autofocus: true);

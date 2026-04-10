@@ -136,6 +136,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noTimeFormatSpecified => 'No time format specified';
 
   @override
+  String get allApplications => 'All Apps';
+
+  @override
   String get nonTvApplications => 'Non-TV Apps';
 
   @override

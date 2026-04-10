@@ -61,6 +61,7 @@ class AppCard extends StatefulWidget
 class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   bool _moving = false;
   bool _clicked = false;
+  DateTime? _lastMoveAt;
   late FocusNode _focusNode;
 
   // late Future<(AppImageType, ImageProvider)> _appImageLoadFuture;
@@ -75,20 +76,14 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   );
 
   late final CurvedAnimation _curvedAnimation =  CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
-  
-  AppsService? _appsService;
 
   @override
   void initState() {
     super.initState();
     _focusNode = FocusNode();
 
-    _appsService = Provider.of<AppsService>(context, listen: false);
-    _appsService!.addListener(_onAppsServiceChanged);
-
     FocusManager.instance.addHighlightModeListener(_focusHighlightModeChanged);
-    //_appImageLoadFuture = _loadAppBannerOrIcon(_appsService!);
-    _loadAppImage(_appsService!);
+    _loadAppImage(Provider.of<AppsService>(context, listen: false));
 
     // Check if we need to restore focus/reorder mode after a move
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -108,6 +103,16 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   @override
   void didUpdateWidget(AppCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    final appsService = Provider.of<AppsService>(context, listen: false);
+
+    if (oldWidget.application.packageName != widget.application.packageName) {
+      _loadedImage = null;
+      _imageLoadError = false;
+      _loadAppImage(appsService);
+    } else if (appsService.consumeDirtyImage(widget.application.packageName)) {
+      _loadAppImage(appsService);
+    }
     
     // Check for pending focus on update as well
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -128,25 +133,12 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    if (_appsService != null) {
-      _appsService!.removeListener(_onAppsServiceChanged);
-    }
     FocusManager.instance.removeHighlightModeListener(_focusHighlightModeChanged);
     _curvedAnimation.dispose();
     _animation.dispose();
     _focusNode.dispose();
 
     super.dispose();
-  }
-
-  void _onAppsServiceChanged() {
-    _loadAppImage(_appsService!);
-
-    // Reload the app image when the AppsService notifies of changes
-    // (e.g., after setting a custom banner)
-    // setState(() {
-    //   _appImageLoadFuture = _loadAppBannerOrIcon(_appsService!);
-    // });
   }
 
   @override
@@ -384,7 +376,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         setState(() => _imageLoadError = true);
       }
     }
-}
+  }
 
   Widget _appImage()
   {
@@ -582,27 +574,32 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
 
   KeyEventResult _onPressed(LogicalKeyboardKey? key) {
     if (_moving) {
-
-      WidgetsBinding.instance.addPostFrameCallback((_) => Scrollable.ensureVisible(context,
-          alignment: 0.1, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut));
-      if (key == LogicalKeyboardKey.arrowLeft) {
-
-        widget.onMove(AxisDirection.left);
-      } else if (key == LogicalKeyboardKey.arrowUp) {
-
-        widget.onMove(AxisDirection.up);
-      } else if (key == LogicalKeyboardKey.arrowRight) {
-
-        widget.onMove(AxisDirection.right);
-      } else if (key == LogicalKeyboardKey.arrowDown) {
-
-        widget.onMove(AxisDirection.down);
-      } else if (_validationKeys.contains(key) || key == LogicalKeyboardKey.escape) {
-
+      if (_validationKeys.contains(key) || key == LogicalKeyboardKey.escape) {
+        _lastMoveAt = null;
         setState(() => _moving = false);
         widget.onMoveEnd();
       } else {
-        return KeyEventResult.ignored;
+        final now = DateTime.now();
+        if (_lastMoveAt != null &&
+            now.difference(_lastMoveAt!).inMilliseconds < 60) {
+          return KeyEventResult.handled;
+        }
+
+        if (key == LogicalKeyboardKey.arrowLeft) {
+          widget.onMove(AxisDirection.left);
+        } else if (key == LogicalKeyboardKey.arrowUp) {
+          widget.onMove(AxisDirection.up);
+        } else if (key == LogicalKeyboardKey.arrowRight) {
+          widget.onMove(AxisDirection.right);
+        } else if (key == LogicalKeyboardKey.arrowDown) {
+          widget.onMove(AxisDirection.down);
+        } else {
+          return KeyEventResult.ignored;
+        }
+
+        _lastMoveAt = now;
+        WidgetsBinding.instance.addPostFrameCallback((_) => Scrollable.ensureVisible(context,
+            alignment: 0.1, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut));
       }
 
       return KeyEventResult.handled;
