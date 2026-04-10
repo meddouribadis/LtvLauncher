@@ -338,6 +338,12 @@ abstract class AppLocalizations {
   /// **'No time format specified'**
   String get noTimeFormatSpecified;
 
+  /// No description provided for @allApplications.
+  ///
+  /// In en, this message translates to:
+  /// **'All Apps'**
+  String get allApplications;
+
   /// No description provided for @nonTvApplications.
   ///
   /// In en, this message translates to:

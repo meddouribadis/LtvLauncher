@@ -106,6 +106,7 @@ class AppsGrid extends StatelessWidget
     return index >= 0 ? index : null;
   }
 
+  // TO DO : refractor duplicate _onMove code
   void _onMove(BuildContext context, AxisDirection direction, int index) {
     final currentRow = (index / category.columnsCount).floor();
     final totalRows = ((applications.length - 1) / category.columnsCount).floor();
@@ -138,11 +139,13 @@ class AppsGrid extends StatelessWidget
     if (newIndex != null) {
       final appsService = context.read<AppsService>();
       final movingApp = applications[index];
-      
-      appsService.reorderApplication(category, index, newIndex);
-      
-      // Set pending focus so the app at the new position will request focus
-      appsService.setPendingReorderFocus(movingApp.packageName, category.id);
+      final realOldIndex = category.applications.indexOf(movingApp);
+      final realNewIndex = category.applications.indexOf(applications[newIndex]);
+      if (realOldIndex >= 0 && realNewIndex >= 0) {
+        appsService.reorderApplication(category, realOldIndex, realNewIndex);
+        // Set pending focus so the app at the new position will request focus
+        appsService.setPendingReorderFocus(movingApp.packageName, category.id);
+      }
     }
   }
 

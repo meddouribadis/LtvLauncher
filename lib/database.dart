@@ -97,7 +97,7 @@ class FLauncherDatabase extends _$FLauncherDatabase
   FLauncherDatabase.inMemory() : super(LazyDatabase(() => NativeDatabase.memory()));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -130,6 +130,12 @@ class FLauncherDatabase extends _$FLauncherDatabase
           if (from < 8) {
             await migrator.addColumn(apps, apps.lastLaunchedAt);
           }
+          if (from < 9) {
+            await _mergeTvAndNonTvCategories();
+          }
+          if (from < 10) {
+            await _stripFavoritesFromAllApps();
+          }
         },
         beforeOpen: (openingDetails) async {
           await customStatement('PRAGMA foreign_keys = ON;');
@@ -137,6 +143,74 @@ class FLauncherDatabase extends _$FLauncherDatabase
           wasCreated = openingDetails.wasCreated;
         },
       );
+
+  /// Migration: merge "TV Apps" and "Non-TV Apps" into a single "All Apps" category.
+  Future<void> _mergeTvAndNonTvCategories() async {
+    final tvRows = await customSelect(
+      "SELECT id FROM categories WHERE name = 'TV Apps'",
+    ).get();
+    final nonTvRows = await customSelect(
+      "SELECT id FROM categories WHERE name = 'Non-TV Apps'",
+    ).get();
+
+    final int? tvId = tvRows.isNotEmpty ? tvRows.first.read<int>('id') : null;
+    final int? nonTvId = nonTvRows.isNotEmpty ? nonTvRows.first.read<int>('id') : null;
+
+    if (tvId != null && nonTvId != null) {
+      // Both exist: rename TV Apps -> All Apps, move Non-TV apps into it, delete Non-TV category
+      await customStatement("UPDATE categories SET name = 'All Apps' WHERE id = ?", [tvId]);
+
+      final maxOrderResult = await customSelect(
+        "SELECT COALESCE(MAX(\"order\"), -1) + 1 AS next_order FROM apps_categories WHERE category_id = ?",
+        variables: [Variable.withInt(tvId)],
+      ).getSingle();
+      int nextOrder = maxOrderResult.read<int>('next_order');
+
+      final nonTvEntries = await customSelect(
+        "SELECT app_package_name FROM apps_categories WHERE category_id = ? ORDER BY \"order\"",
+        variables: [Variable.withInt(nonTvId)],
+      ).get();
+
+      for (final entry in nonTvEntries) {
+        final packageName = entry.read<String>('app_package_name');
+        await customStatement(
+          "INSERT OR IGNORE INTO apps_categories (category_id, app_package_name, \"order\") VALUES (?, ?, ?)",
+          [tvId, packageName, nextOrder],
+        );
+        nextOrder++;
+      }
+
+      await customStatement("DELETE FROM apps_categories WHERE category_id = ?", [nonTvId]);
+      await customStatement("DELETE FROM categories WHERE id = ?", [nonTvId]);
+    } else if (tvId != null) {
+      await customStatement("UPDATE categories SET name = 'All Apps' WHERE id = ?", [tvId]);
+    } else if (nonTvId != null) {
+      await customStatement("UPDATE categories SET name = 'All Apps' WHERE id = ?", [nonTvId]);
+    }
+  }
+
+  /// Migration: remove apps that are in "Favorites" from "All Apps",
+  /// so the data model matches the UI (favorites live only in the dock).
+  Future<void> _stripFavoritesFromAllApps() async {
+    final allAppsRows = await customSelect(
+      "SELECT id FROM categories WHERE name = 'All Apps'",
+    ).get();
+    final favRows = await customSelect(
+      "SELECT id FROM categories WHERE name = 'Favorites'",
+    ).get();
+
+    if (allAppsRows.isEmpty || favRows.isEmpty) return;
+
+    final allAppsId = allAppsRows.first.read<int>('id');
+    final favId = favRows.first.read<int>('id');
+
+    await customStatement(
+      "DELETE FROM apps_categories "
+      "WHERE category_id = ? AND app_package_name IN "
+      "(SELECT app_package_name FROM apps_categories WHERE category_id = ?)",
+      [allAppsId, favId],
+    );
+  }
 
   Future<void> persistApps(Iterable<AppsCompanion> applications) =>
       batch((batch) => batch.insertAllOnConflictUpdate(apps, applications));
