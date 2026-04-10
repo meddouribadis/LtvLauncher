@@ -76,10 +76,11 @@ class _FLauncherState extends State<FLauncher> {
             child: Scaffold(
               backgroundColor: Colors.transparent,
               appBar: FocusAwareAppBar(key: _appBarKey),
-              body: Consumer<AppsService>(
-                builder: (context, appsService, _) {
-                  if (appsService.initialized) {
-                    return _tvOSLayout(context, appsService);
+              body: Selector<AppsService, (bool, int)>(
+                selector: (_, service) => (service.initialized, service.layoutVersion),
+                builder: (context, data, _) {
+                  if (data.$1) {
+                    return _tvOSLayout(context, context.read<AppsService>());
                   } else {
                     return _emptyState(context);
                   }

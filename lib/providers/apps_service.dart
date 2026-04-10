@@ -37,6 +37,7 @@ class AppsService extends ChangeNotifier
   final FLauncherDatabase _database;
 
   bool _initialized = false;
+  int _layoutVersion = 0;
 
   List<LauncherSection> _launcherSections = List.empty(growable: true);
   Map<String, App> _applications = Map();
@@ -53,6 +54,13 @@ class AppsService extends ChangeNotifier
   }
 
   bool get initialized => _initialized;
+  int get layoutVersion => _layoutVersion;
+
+  @override
+  void notifyListeners() {
+    _layoutVersion++;
+    super.notifyListeners();
+  }
 
   String? _pendingReorderFocusPackage;
   int? _pendingReorderFocusCategoryId;
@@ -66,6 +74,9 @@ class AppsService extends ChangeNotifier
     _pendingReorderFocusPackage = packageName;
     _pendingReorderFocusCategoryId = categoryId;
   }
+
+  final Set<String> _dirtyImagePackages = {};
+  bool consumeDirtyImage(String packageName) => _dirtyImagePackages.remove(packageName);
 
   List<App> get applications => UnmodifiableListView(_applications.values.sortedBy((application) => application.name));
 
@@ -95,6 +106,7 @@ class AppsService extends ChangeNotifier
       if (changedPackageName != null) {
         _iconCache.remove(changedPackageName);
         _bannerCache.remove(changedPackageName);
+        _dirtyImagePackages.add(changedPackageName);
       }
 
       switch (event["action"]) {
@@ -398,6 +410,7 @@ class AppsService extends ChangeNotifier
     final prefs = await _prefsAsync;
     await prefs.setString('custom_banner_$packageName', imagePath);
     _bannerCache.remove(packageName);
+    _dirtyImagePackages.add(packageName);
     notifyListeners();
   }
 
@@ -413,6 +426,7 @@ class AppsService extends ChangeNotifier
     }
     await prefs.remove('custom_banner_$packageName');
     _bannerCache.remove(packageName);
+    _dirtyImagePackages.add(packageName);
     notifyListeners();
   }
 
