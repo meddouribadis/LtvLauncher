@@ -246,6 +246,7 @@ class _FLauncherState extends State<FLauncher> {
     return slivers;
   }
 
+  // TO DO : refractor duplicate _onMove code
   void _onGridMove(BuildContext context, Category category, int index,
       AxisDirection direction, List<App> filteredApps) {
     final currentRow = (index / category.columnsCount).floor();
