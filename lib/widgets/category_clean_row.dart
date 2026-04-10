@@ -24,7 +24,6 @@ import 'package:provider/provider.dart';
 
 import '../models/app.dart';
 import '../models/category.dart';
-import '../providers/settings_service.dart';
 
 class CategoryCleanRow extends StatelessWidget
 {
@@ -82,6 +81,7 @@ class CategoryCleanRow extends StatelessWidget
     );
   }
 
+  // TO DO : refractor duplicate _onMove code
   void _onMove(BuildContext context, AxisDirection direction, int index) {
     int newIndex = 0;
 

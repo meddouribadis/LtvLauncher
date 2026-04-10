@@ -106,6 +106,7 @@ class AppsGrid extends StatelessWidget
     return index >= 0 ? index : null;
   }
 
+  // TO DO : refractor duplicate _onMove code
   void _onMove(BuildContext context, AxisDirection direction, int index) {
     final currentRow = (index / category.columnsCount).floor();
     final totalRows = ((applications.length - 1) / category.columnsCount).floor();
