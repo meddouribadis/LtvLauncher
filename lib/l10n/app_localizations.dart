@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFlauncher.
   ///
   /// In en, this message translates to:
-  /// **'About LTvLauncher'**
+  /// **'About ArcLauncher'**
   String get aboutFlauncher;
 
   /// No description provided for @addCategory.

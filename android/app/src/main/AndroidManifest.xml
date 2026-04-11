@@ -51,7 +51,7 @@
         android:banner="@drawable/banner"
         android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="LTvLauncher">
+        android:label="Arc Launcher">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -79,7 +79,7 @@
         <service
             android:name=".ClockScreensaverService"
             android:exported="true"
-            android:label="LTvLauncher Clock"
+            android:label="Arc Launcher Clock"
             android:permission="android.permission.BIND_DREAM_SERVICE">
             <intent-filter>
                 <action android:name="android.service.dreams.DreamService" />

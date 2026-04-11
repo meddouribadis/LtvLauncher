@@ -84,7 +84,7 @@
     "showCategoryTitles": "Mostrar títulos de categorías",
     "sort": "Orden",
     "systemSettings": "Ajustes del sistema",
-    "textAboutDialog": "LTvLauncher es un lanzador de código abierto personalizado para Android TV, basado en FLauncher.\n\nDesarrollado por LeanBitLab.\nCódigo fuente disponible en {repoUrl}.",
+    "textAboutDialog": "Arc Launcher es un lanzador de código abierto personalizado para Android TV, basado en FLauncher.\n\nDesarrollado por Meddouri Badis.\nCódigo fuente disponible en {repoUrl}.",
     "@textAboutDialog": {
         "placeholders": {
             "repoUrl": {
