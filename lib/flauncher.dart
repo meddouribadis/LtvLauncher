@@ -53,50 +53,52 @@ class _FLauncherState extends State<FLauncher> {
 
   @override
   Widget build(BuildContext context) => Actions(
-    actions: <Type, Action<Intent>>{
-      MoveFocusToSettingsIntent: CallbackAction<MoveFocusToSettingsIntent>(
-        onInvoke: (_) => _appBarKey.currentState?.focusSettings(),
-      ),
-    },
-    child: FocusTraversalGroup(
-      policy: RowByRowTraversalPolicy(),
-      child: Stack(
-        children: [
-          RepaintBoundary(
-            child: Consumer<WallpaperService>(
-              builder: (_, wallpaperService, __) =>
-                  _wallpaper(context, wallpaperService),
-            ),
+        actions: <Type, Action<Intent>>{
+          MoveFocusToSettingsIntent: CallbackAction<MoveFocusToSettingsIntent>(
+            onInvoke: (_) => _appBarKey.currentState?.focusSettings(),
           ),
-          Consumer<LauncherState>(
-            builder: (_, state, child) => Visibility(
-              replacement: const Center(child: AlternativeLauncherView()),
-              visible: state.launcherVisible,
-              child: child!,
-            ),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              appBar: FocusAwareAppBar(key: _appBarKey),
-              body: Selector<AppsService, (bool, int)>(
-                selector: (_, service) => (service.initialized, service.layoutVersion),
-                builder: (context, data, _) {
-                  if (data.$1) {
-                    return _tvOSLayout(context, context.read<AppsService>());
-                  } else {
-                    return _emptyState(context);
-                  }
-                },
+        },
+        child: FocusTraversalGroup(
+          policy: RowByRowTraversalPolicy(),
+          child: Stack(
+            children: [
+              RepaintBoundary(
+                child: Consumer<WallpaperService>(
+                  builder: (_, wallpaperService, __) =>
+                      _wallpaper(context, wallpaperService),
+                ),
               ),
-            ),
+              Consumer<LauncherState>(
+                builder: (_, state, child) => Visibility(
+                  replacement: const Center(child: AlternativeLauncherView()),
+                  visible: state.launcherVisible,
+                  child: child!,
+                ),
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  appBar: FocusAwareAppBar(key: _appBarKey),
+                  body: Selector<AppsService, (bool, int)>(
+                    selector: (_, service) =>
+                        (service.initialized, service.layoutVersion),
+                    builder: (context, data, _) {
+                      if (data.$1) {
+                        return _tvOSLayout(
+                            context, context.read<AppsService>());
+                      } else {
+                        return _emptyState(context);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
 
   Widget _tvOSLayout(BuildContext context, AppsService appsService) {
     final favoritesCategory =
-    appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
+        appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
     final favoriteApps = favoritesCategory?.applications ?? const [];
 
     final otherSections = appsService.launcherSections.where((section) {
@@ -112,10 +114,10 @@ class _FLauncherState extends State<FLauncher> {
         if (favoriteApps.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: SizedBox(
-              height: MediaQuery.of(context).size.height
-                  - MediaQuery.of(context).padding.top
-                  - kToolbarHeight
-                  - 150,
+              height: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  kToolbarHeight -
+                  150,
             ),
           ),
           SliverToBoxAdapter(
@@ -216,22 +218,22 @@ class _FLauncherState extends State<FLauncher> {
                 findChildIndexCallback: (Key key) {
                   final valueKey = key as ValueKey<String>;
                   final index = filteredApps.indexWhere(
-                        (app) => app.packageName == valueKey.value,
+                    (app) => app.packageName == valueKey.value,
                   );
                   return index >= 0 ? index : null;
                 },
-                    (context, index) => Padding(
+                (context, index) => Padding(
                   key: Key(filteredApps[index].packageName),
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                   child: AppCard(
                     category: category,
                     application: filteredApps[index],
                     autofocus: index == 0,
                     handleUpNavigationToSettings:
-                    isFirstSection && index < category.columnsCount,
-                    onMove: (direction) =>
-                        _onGridMove(context, category, index, direction, filteredApps),
+                        isFirstSection && index < category.columnsCount,
+                    onMove: (direction) => _onGridMove(
+                        context, category, index, direction, filteredApps),
                     onMoveEnd: () => context
                         .read<AppsService>()
                         .saveApplicationOrderInCategory(category),
@@ -252,7 +254,7 @@ class _FLauncherState extends State<FLauncher> {
       AxisDirection direction, List<App> filteredApps) {
     final currentRow = (index / category.columnsCount).floor();
     final totalRows =
-    ((filteredApps.length - 1) / category.columnsCount).floor();
+        ((filteredApps.length - 1) / category.columnsCount).floor();
 
     int? newIndex;
     switch (direction) {
@@ -276,7 +278,8 @@ class _FLauncherState extends State<FLauncher> {
       final appsService = context.read<AppsService>();
       final movingApp = filteredApps[index];
       final realOldIndex = category.applications.indexOf(movingApp);
-      final realNewIndex = category.applications.indexOf(filteredApps[newIndex]);
+      final realNewIndex =
+          category.applications.indexOf(filteredApps[newIndex]);
       if (realOldIndex >= 0 && realNewIndex >= 0) {
         appsService.reorderApplication(category, realOldIndex, realNewIndex);
         appsService.setPendingReorderFocus(movingApp.packageName, category.id);
@@ -318,14 +321,14 @@ class _FLauncherState extends State<FLauncher> {
 
     return Center(
       //child: RepaintBoundary(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          child: backdropDisabled
-              ? content
-              : BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: content,
-                ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: backdropDisabled
+            ? content
+            : BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: content,
+              ),
         //),
       ),
     );
@@ -339,10 +342,7 @@ class _FLauncherState extends State<FLauncher> {
         width: physicalSize.width,
         height: physicalSize.height,
         child: WallpaperVideoBackground(
-          key: Key("background_video_${wallpaperService.wallpaperGeneration}"),
-          file: videoFile,
-          generation: wallpaperService.wallpaperGeneration,
-        ),
+            key: Key("background_video"), file: videoFile),
       );
     }
     if (wallpaperService.wallpaper != null) {
@@ -353,11 +353,12 @@ class _FLauncherState extends State<FLauncher> {
         height: physicalSize.height,
         width: physicalSize.width,
       );
+    } else {
+      return Container(
+        key: const Key("background"),
+        decoration: BoxDecoration(gradient: wallpaperService.gradient.gradient),
+      );
     }
-    return Container(
-      key: const Key("background"),
-      decoration: BoxDecoration(gradient: wallpaperService.gradient.gradient),
-    );
   }
 
   Widget _emptyState(BuildContext context) {

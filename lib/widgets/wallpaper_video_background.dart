@@ -25,14 +25,13 @@ class WallpaperVideoBackground extends StatefulWidget {
   const WallpaperVideoBackground({
     super.key,
     required this.file,
-    required this.generation,
   });
 
   final File file;
-  final int generation;
 
   @override
-  State<WallpaperVideoBackground> createState() => _WallpaperVideoBackgroundState();
+  State<WallpaperVideoBackground> createState() =>
+      _WallpaperVideoBackgroundState();
 }
 
 class _WallpaperVideoBackgroundState extends State<WallpaperVideoBackground> {
@@ -47,7 +46,7 @@ class _WallpaperVideoBackgroundState extends State<WallpaperVideoBackground> {
   @override
   void didUpdateWidget(WallpaperVideoBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.file.path != widget.file.path || oldWidget.generation != widget.generation) {
+    if (oldWidget.file.path != widget.file.path) {
       _disposeController();
       _initController();
     }
