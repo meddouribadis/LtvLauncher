@@ -84,6 +84,43 @@
     "showCategoryTitles": "Show category titles",
     "sort": "Sort",
     "systemSettings": "System settings",
+    "updateCheck": "Check for updates",
+    "updateNoUpdateTitle": "No updates available",
+    "updateNoUpdateBody": "You are already on the latest version ({currentVersion}).",
+    "@updateNoUpdateBody": {
+        "placeholders": {
+            "currentVersion": {
+                "type": "String"
+            }
+        }
+    },
+    "updateAvailableTitle": "Update available",
+    "updateAvailableBody": "Version {latestVersion} is available (current: {currentVersion}).",
+    "@updateAvailableBody": {
+        "placeholders": {
+            "latestVersion": {
+                "type": "String"
+            },
+            "currentVersion": {
+                "type": "String"
+            }
+        }
+    },
+    "updateDownloadButton": "Download",
+    "updateReadyToInstallTitle": "Ready to install",
+    "updateReadyToInstallBody": "The APK for version {latestVersion} is downloaded. Start installation now?",
+    "@updateReadyToInstallBody": {
+        "placeholders": {
+            "latestVersion": {
+                "type": "String"
+            }
+        }
+    },
+    "updateInstallButton": "Install",
+    "updateInstallPermissionTitle": "Installer permission required",
+    "updateInstallPermissionBody": "Allow Arc Launcher to install unknown apps, then retry the update.",
+    "updateOpenPermissionSettingsButton": "Open permission settings",
+    "updateErrorGeneric": "Update check failed. Please try again.",
     "textAboutDialog": "Arc Launcher is a customized open-source launcher for Android TV, based on FLauncher.\n\nDeveloped by Meddouri Badis.\nSource code available at {repoUrl}.",
     "@textAboutDialog": {
         "placeholders": {

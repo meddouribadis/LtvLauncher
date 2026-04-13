@@ -33,12 +33,14 @@ import android.provider.Settings;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.app.AppOpsManager;
@@ -83,6 +85,11 @@ public class MainActivity extends FlutterActivity {
                 case "launchActivityFromAction" -> result.success(launchActivityFromAction(call.arguments()));
                 case "launchApp" -> result.success(launchApp(call.arguments()));
                 case "openSettings" -> result.success(openSettings());
+                case "installApk" -> result.success(installApk(call.arguments()));
+                case "requestInstallUnknownAppsPermission" -> {
+                    requestInstallUnknownAppsPermission();
+                    result.success(null);
+                }
                 case "openScreensaverSettings" -> result.success(openScreensaverSettings());
                 case "openAppInfo" -> result.success(openAppInfo(call.arguments()));
                 case "uninstallApp" -> result.success(uninstallApp(call.arguments()));
@@ -347,6 +354,39 @@ public class MainActivity extends FlutterActivity {
 
     private boolean openSettings() {
         return launchActivityFromAction(Settings.ACTION_SETTINGS);
+    }
+
+    private boolean installApk(String apkPath) {
+        File apkFile = new File(apkPath);
+        if (!apkFile.exists()) {
+            return false;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !getPackageManager().canRequestPackageInstalls()) {
+            return false;
+        }
+
+        Uri apkUri = FileProvider.getUriForFile(
+                this,
+                getPackageName() + ".fileprovider",
+                apkFile
+        );
+
+        Intent installIntent = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(apkUri, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        return tryStartActivity(installIntent);
+    }
+
+    private void requestInstallUnknownAppsPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                    .setData(Uri.parse("package:" + getPackageName()));
+            tryStartActivity(intent);
+        }
     }
 
     private boolean openAppInfo(String packageName) {

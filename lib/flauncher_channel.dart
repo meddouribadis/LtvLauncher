@@ -99,7 +99,14 @@ class FLauncherChannel {
   Future<void> openWifiSettings() async =>
       await _methodChannel.invokeMethod("openWifiSettings");
 
-  Future<void> startAmbientMode() async => await _methodChannel.invokeMethod("startAmbientMode");
+  Future<void> startAmbientMode() async =>
+      await _methodChannel.invokeMethod("startAmbientMode");
+
+  Future<bool> installApk(String apkPath) async =>
+      await _methodChannel.invokeMethod("installApk", apkPath);
+
+  Future<void> requestInstallUnknownAppsPermission() async =>
+      await _methodChannel.invokeMethod("requestInstallUnknownAppsPermission");
 
   void addAppsChangedListener(void Function(Map<String, dynamic>) listener) =>
       _appsEventChannel.receiveBroadcastStream().listen((event) {

@@ -17,9 +17,11 @@
  */
 
 import 'package:flauncher/providers/apps_service.dart';
+import 'package:flauncher/providers/update_service.dart';
 import 'package:flauncher/widgets/settings/applications_panel_page.dart';
 import 'package:flauncher/widgets/settings/flauncher_about_dialog.dart';
 import 'package:flauncher/widgets/settings/interface_settings_page.dart';
+import 'package:flauncher/widgets/settings/update_dialogs.dart';
 import 'package:flauncher/widgets/settings/general_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -66,6 +68,11 @@ class SettingsPanelPage extends StatelessWidget {
                   onPressed: () => context.read<AppsService>().openSettings(),
                 ),
                 FocusableSettingsTile(
+                  leading: const Icon(Icons.system_update_alt),
+                  title: Text(localizations.updateCheck, style: Theme.of(context).textTheme.bodyMedium),
+                  onPressed: () => _checkForUpdates(context),
+                ),
+                FocusableSettingsTile(
                   leading: const Icon(Icons.info_outline),
                   title: Text(localizations.aboutFlauncher, style: Theme.of(context).textTheme.bodyMedium),
                   onPressed: () => showDialog(
@@ -75,14 +82,94 @@ class SettingsPanelPage extends StatelessWidget {
                       builder: (context, snapshot) => snapshot.connectionState == ConnectionState.done && snapshot.hasData
                           ? LTvLauncherAboutDialog(packageInfo: snapshot.data!)
                           : Container(),
-                    )
-                  )
-                )
-              ]
-            )
-          )
-        )
-      ]
+                    )))
+      ])))
+    ]);
+  }
+}
+
+Future<void> _checkForUpdates(BuildContext context) async {
+  final localizations = AppLocalizations.of(context)!;
+  final updateService = UpdateService();
+  final navigator = Navigator.of(context, rootNavigator: true);
+
+  showUpdateProgressDialog(
+    context,
+    label: localizations.updateCheck,
+  );
+
+  try {
+    final update = await updateService.checkForUpdate();
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+    if (!context.mounted) {
+      return;
+    }
+
+    if (!update.updateAvailable) {
+      await showNoUpdateDialog(
+        context,
+        localizations,
+        currentVersion: update.currentVersion,
+      );
+      return;
+    }
+
+    final download = await showUpdateAvailableDialog(
+      context,
+      localizations,
+      latestVersion: update.latestVersion,
+      currentVersion: update.currentVersion,
+    );
+
+    if (!download) {
+      return;
+    }
+
+    showUpdateProgressDialog(
+      context,
+      label: localizations.updateDownloadButton,
+    );
+
+    final downloadedApk = await updateService.downloadApk(update);
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+    if (!context.mounted) {
+      return;
+    }
+
+    final install = await showReadyToInstallDialog(
+      context,
+      localizations,
+      latestVersion: downloadedApk.version,
+    );
+
+    if (!install) {
+      return;
+    }
+
+    final installerOpened = await updateService.installApk(downloadedApk.path);
+    if (!context.mounted || installerOpened) {
+      return;
+    }
+
+    await showInstallPermissionDialog(
+      context,
+      localizations,
+      onOpenPermissionSettings: () =>
+          updateService.requestInstallUnknownAppsPermission(),
+    );
+  } catch (_) {
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+    if (!context.mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(localizations.updateErrorGeneric)),
     );
   }
 }
