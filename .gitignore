@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+android/app/.cxx
 
 # IntelliJ related
 *.iml
@@ -72,8 +73,6 @@ QWEN.md
 
 # Local Project Docs & Tools
 pdocs/
-build_log.txt
-release_build_log.txt
 
 # Android Secrets
 android/keystore.properties
