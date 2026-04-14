@@ -5,5 +5,5 @@
   "editor.minimap.sectionHeaderFontSize": 11,
   "debug.console.fontSize": 16,
   "markdown.preview.fontSize": 16,
-  "dart.flutterSdkPath": ".fvm/versions/3.24.5"
+  "dart.flutterSdkPath": ".fvm/versions/3.29.3"
 }

@@ -1,7 +1,7 @@
 # Arc Launcher
 
 <picture>
-  <img alt="Arc Launcher Preview" src="assets/home.webp">
+  <img alt="Arc Launcher Preview" src="docs/images/home.webp">
 </picture>
 
 [![Version](https://img.shields.io/github/v/release/meddouribadis/arclauncher?style=for-the-badge&color=7C4DFF&label=Version)](https://github.com/meddouribadis/arclauncher/releases/latest) [![Downloads](https://img.shields.io/github/downloads/meddouribadis/arclauncher/total?style=for-the-badge&color=7C4DFF&label=Downloads)](https://github.com/meddouribadis/arclauncher/releases) [![Stars](https://img.shields.io/github/stars/meddouribadis/arclauncher?style=for-the-badge&color=7C4DFF)](https://github.com/meddouribadis/arclauncher/stargazers)
@@ -47,9 +47,9 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
     <td align="center">Multiple wallpapers</td>
   </tr>
   <tr>
-    <td><img src="assets/screen_settings1.png" width="100%" alt="Settings screen 1"/></td>
-    <td><img src="assets/screen_settings2.png" width="100%" alt="Settings screen 2"/></td>
-    <td><img src="assets/screen_settings3.png" width="100%" alt="Settings screen 3"/></td>
+    <td><img src="docs/images/screen_settings1.png" width="100%" alt="Settings screen 1"/></td>
+    <td><img src="docs/images/screen_settings2.png" width="100%" alt="Settings screen 2"/></td>
+    <td><img src="docs/images/screen_settings3.png" width="100%" alt="Settings screen 3"/></td>
   </tr>
   <tr>
     <td align="center">Disable blur</td>
@@ -57,9 +57,9 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
     <td align="center">Custom banner</td>
   </tr>
   <tr>
-    <td><img src="assets/screen_settings4.png" width="100%" alt="Settings screen 4"/></td>
-    <td><img src="assets/screen_settings5.png" width="100%" alt="Settings screen 5"/></td>
-    <td><img src="assets/screen_settings6.png" width="100%" alt="Settings screen 6"/></td>
+    <td><img src="docs/images/screen_settings4.png" width="100%" alt="Settings screen 4"/></td>
+    <td><img src="docs/images/screen_settings5.png" width="100%" alt="Settings screen 5"/></td>
+    <td><img src="docs/images/screen_settings6.png" width="100%" alt="Settings screen 6"/></td>
   </tr>
 </table>
 
