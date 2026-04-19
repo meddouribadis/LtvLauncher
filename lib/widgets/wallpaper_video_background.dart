@@ -19,8 +19,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
+import 'package:video_player/video_player.dart';
 
 class WallpaperVideoBackground extends StatefulWidget {
   const WallpaperVideoBackground({
@@ -35,62 +34,65 @@ class WallpaperVideoBackground extends StatefulWidget {
       _WallpaperVideoBackgroundState();
 }
 
-class _WallpaperVideoBackgroundState extends State<WallpaperVideoBackground>
-with WidgetsBindingObserver {
-
-  late final Player _player;
-  late final VideoController _controller;
+class _WallpaperVideoBackgroundState extends State<WallpaperVideoBackground> {
+  VideoPlayerController? _controller;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _player = Player();
-    _controller = VideoController(_player);
-    _initPlayer();
-  }
-
-  void _initPlayer() {
-    _player.setVolume(0);
-    _player.setPlaylistMode(PlaylistMode.loop);
-    _player.open(Media('file://${widget.file.path}'));
+    _initController();
   }
 
   @override
   void didUpdateWidget(WallpaperVideoBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.file.path != widget.file.path) {
-      _player.open(Media('file://${widget.file.path}'));
+      _disposeController();
+      _initController();
     }
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      _player.pause();
-    } else if (state == AppLifecycleState.resumed) {
-      _player.play();
-    }
+  void _initController() {
+    final controller = VideoPlayerController.file(widget.file);
+    _controller = controller;
+    controller.initialize().then((_) {
+      if (!mounted || _controller != controller) return;
+      controller.setLooping(true);
+      controller.setVolume(0);
+      controller.play();
+      setState(() {});
+    });
+  }
+
+  void _disposeController() {
+    _controller?.dispose();
+    _controller = null;
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _player.dispose();
+    _disposeController();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return const ColoredBox(color: Colors.black);
+    }
+
+    final size = controller.value.size;
     return RepaintBoundary(
-      child: SizedBox.expand(
-        child: Video(
-          controller: _controller,
-          controls: NoVideoControls,
-          fit: BoxFit.cover,
+        child: SizedBox.expand(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: size.width,
+          height: size.height,
+          child: VideoPlayer(controller),
         ),
       ),
-    );
+    ));
   }
-
 }

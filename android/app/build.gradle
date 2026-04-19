@@ -54,9 +54,9 @@ android {
 
     defaultConfig {
         applicationId "com.omeda.arc"
-        compileSdk 36
+        compileSdk 35
         minSdkVersion flutter.minSdkVersion
-        targetSdk 36
+        targetSdk 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
