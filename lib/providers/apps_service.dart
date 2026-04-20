@@ -513,10 +513,26 @@ class AppsService extends ChangeNotifier
         return; // Not a special category
     }
     
+    if (appsToAdd.isEmpty) {
+      return;
+    }
+
+    int nextOrder = await _database.nextAppCategoryOrder(actualCategory.id) ?? 0;
+    List<AppsCategoriesCompanion> batch = [];
+
     for (final app in appsToAdd) {
-      await addToCategory(app, actualCategory, shouldNotifyListeners: false);
+      batch.add(AppsCategoriesCompanion.insert(
+        categoryId: actualCategory.id,
+        appPackageName: app.packageName,
+        order: nextOrder,
+      ));
+      app.categoryOrders[actualCategory.id] = nextOrder;
+      actualCategory.applications.add(app);
+      nextOrder++;
     }
     
+    await _database.insertAppsCategories(batch);
+    sortCategory(actualCategory);
     notifyListeners();
   }
 
