@@ -45,6 +45,31 @@ void main() async {
     expect(settingsService.timeFormat, expected);
   });
 
+  test("setDateTimeFormat sets both date and time format", () async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final settingsService = SettingsService(sharedPreferences);
+    final expectedDate = "yyyy-MM-dd";
+    final expectedTime = "HH:mm:ss";
+
+    await settingsService.setDateTimeFormat(expectedDate, expectedTime);
+
+    expect(settingsService.dateFormat, expectedDate);
+    expect(settingsService.timeFormat, expectedTime);
+  });
+
+  test("setDateTimeFormat notifies listeners", () async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final settingsService = SettingsService(sharedPreferences);
+
+    bool notified = false;
+    settingsService.addListener(() {
+      notified = true;
+    });
+
+    await settingsService.setDateTimeFormat("yyyy-MM-dd", "HH:mm:ss");
+    expect(notified, isTrue);
+  });
+
   test("setGradientUuid", () async {
     final sharedPreferences = await SharedPreferences.getInstance();
     final settingsService = SettingsService(sharedPreferences);
