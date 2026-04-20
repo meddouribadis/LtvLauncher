@@ -134,8 +134,6 @@ void main() {
               'sideloaded': false,
             }
           ]));
-      when(channel.applicationExists("uninstalled.app")).thenAnswer((_) => Future.value(false));
-      when(channel.applicationExists("not.uninstalled.app")).thenAnswer((_) => Future.value(true));
       when(database.listApplications()).thenAnswer((_) => Future.value([
             fakeApp(packageName: "me.efesser.flauncher", name: "FLauncher", version: "1.0.0"),
             fakeApp(packageName: "uninstalled.app", name: "Uninstalled Application", version: "1.0.0"),
@@ -163,7 +161,7 @@ void main() {
             sideloaded: Value(false),
           )
         ]),
-        database.deleteApps(["uninstalled.app"]),
+        database.deleteApps(["uninstalled.app", "not.uninstalled.app"]),
         database.listCategoriesWithVisibleApps(),
         database.listApplications(),
       ]);

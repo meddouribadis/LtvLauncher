@@ -79,7 +79,6 @@ public class MainActivity extends FlutterActivity {
                 case "getApplications" -> result.success(getApplications());
                 case "getApplicationBanner" -> result.success(getApplicationBanner(call.arguments()));
                 case "getApplicationIcon" -> result.success(getApplicationIcon(call.arguments()));
-                case "applicationExists" -> result.success(applicationExists(call.arguments()));
                 case "launchActivityFromAction" -> result.success(launchActivityFromAction(call.arguments()));
                 case "launchApp" -> result.success(launchApp(call.arguments()));
                 case "openSettings" -> result.success(openSettings());
@@ -269,23 +268,6 @@ public class MainActivity extends FlutterActivity {
         }
 
         return imageBytes;
-    }
-
-    private boolean applicationExists(String packageName) {
-        int flags;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            flags = PackageManager.MATCH_UNINSTALLED_PACKAGES;
-        } else {
-            flags = PackageManager.GET_UNINSTALLED_PACKAGES;
-        }
-
-        try {
-            getPackageManager().getApplicationInfo(packageName, flags);
-            return true;
-        } catch (PackageManager.NameNotFoundException ignored) {
-            return false;
-        }
     }
 
     private List<ResolveInfo> queryIntentActivities(boolean sideloaded) {

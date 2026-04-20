@@ -259,16 +259,7 @@ class AppsService extends ChangeNotifier
     final Iterable<App> appsRemovedFromSystem = appsFromDatabase
         .where((app) => !appsFromSystemByPackageName.containsKey(app.packageName));
 
-    final List<String> uninstalledApplications = [];
-    for (App app in appsRemovedFromSystem) {
-      String packageName = app.packageName;
-
-      // TODO: Is this really necessary? Can't we get this information from the getApplications method?
-      bool appExists = await _fLauncherChannel.applicationExists(packageName);
-      if (!appExists) {
-        uninstalledApplications.add(packageName);
-      }
-    }
+    final List<String> uninstalledApplications = appsRemovedFromSystem.map((app) => app.packageName).toList();
 
     await _database.transaction(() async {
       await _database.persistApps(appsFromSystemByPackageName.values.map((record) => record.$2));

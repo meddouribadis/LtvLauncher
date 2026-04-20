@@ -386,16 +386,6 @@ class MockFLauncherChannel extends _i1.Mock implements _i12.FLauncherChannel {
       ) as _i9.Future<_i13.Uint8List>);
 
   @override
-  _i9.Future<bool> applicationExists(String? packageName) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #applicationExists,
-          [packageName],
-        ),
-        returnValue: _i9.Future<bool>.value(false),
-      ) as _i9.Future<bool>);
-
-  @override
   _i9.Future<void> launchActivityFromAction(String? action) =>
       (super.noSuchMethod(
         Invocation.method(
