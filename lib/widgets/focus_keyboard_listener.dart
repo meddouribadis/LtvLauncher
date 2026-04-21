@@ -43,18 +43,17 @@ class _FocusKeyboardListenerState extends State<FocusKeyboardListener> {
   @override
   Widget build(BuildContext context) => Focus(
         canRequestFocus: false,
-        // Using "onKeyEvent", in favor of the deprecated "onKey"
-        // seems to break the fix for issue #21 so, keep using the old property
-        onKey: (_, rawKeyEvent) => _handleKey(context, rawKeyEvent),
+        onKeyEvent: (_, keyEvent) => _handleKey(context, keyEvent),
         child: Builder(builder: widget.builder),
       );
 
-  KeyEventResult _handleKey(BuildContext context, RawKeyEvent rawKeyEvent) {
-    switch (rawKeyEvent.runtimeType) {
-      case RawKeyDownEvent:
-        return _keyDownEvent(context, rawKeyEvent.logicalKey);
-      case RawKeyUpEvent:
-        return _keyUpEvent(context, rawKeyEvent.logicalKey);
+  KeyEventResult _handleKey(BuildContext context, KeyEvent keyEvent) {
+    switch (keyEvent.runtimeType) {
+      case KeyDownEvent:
+      case KeyRepeatEvent:
+        return _keyDownEvent(context, keyEvent.logicalKey);
+      case KeyUpEvent:
+        return _keyUpEvent(context, keyEvent.logicalKey);
     }
     return KeyEventResult.handled;
   }
