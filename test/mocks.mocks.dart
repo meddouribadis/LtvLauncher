@@ -1308,10 +1308,13 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as bool);
 
   @override
-  bool get squareBannerShapeEnabled => (super.noSuchMethod(
-        Invocation.getter(#squareBannerShapeEnabled),
-        returnValue: false,
-      ) as bool);
+  String get appBannerShape => (super.noSuchMethod(
+        Invocation.getter(#appBannerShape),
+        returnValue: _i18.dummyValue<String>(
+          this,
+          Invocation.getter(#appBannerShape),
+        ),
+      ) as String);
 
   @override
   bool get hideHighlightOutlineOnHomescreen => (super.noSuchMethod(
@@ -1530,11 +1533,10 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as _i9.Future<void>);
 
   @override
-  _i9.Future<void> setSquareBannerShapeEnabled(bool? enabled) =>
-      (super.noSuchMethod(
+  _i9.Future<void> setAppBannerShape(String? shape) => (super.noSuchMethod(
         Invocation.method(
-          #setSquareBannerShapeEnabled,
-          [enabled],
+          #setAppBannerShape,
+          [shape],
         ),
         returnValue: _i9.Future<void>.value(),
         returnValueForMissingStub: _i9.Future<void>.value(),

@@ -187,7 +187,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showCategoryTitles => 'Show category titles';
 
   @override
-  String get squareAppBanners => 'Square App Banners';
+  String get appBannerShape => 'App Banner Shape';
 
   @override
   String get hideHighlightOutlineOnHomescreen =>

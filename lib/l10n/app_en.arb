@@ -81,7 +81,7 @@
     "settings": "Settings",
     "show": "Show",
     "showCategoryTitles": "Show category titles",
-    "squareAppBanners": "Square App Banners",
+    "appBannerShape": "App Banner Shape",
     "hideHighlightOutlineOnHomescreen": "Hide highlight outline on homescreen",
     "appSelectorTransitionAnimation": "App selector transition animation",
     "sort": "Sort",

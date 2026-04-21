@@ -141,12 +141,33 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final bool showAppNames = context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
-    final bool squareBannerShapeEnabled = context.select<SettingsService, bool>((s) => s.squareBannerShapeEnabled);
+    final String appBannerShape = context.select<SettingsService, String>((s) => s.appBannerShape);
     final bool hideHighlightOutlineOnHomescreen = context.select<SettingsService, bool>((s) => s.hideHighlightOutlineOnHomescreen);
     final bool appSelectorTransitionAnimationEnabled = context.select<SettingsService, bool>((s) => s.appSelectorTransitionAnimationEnabled);
 
-    final BorderRadius borderRadius = squareBannerShapeEnabled ? BorderRadius.zero : BorderRadius.circular(8);
-    final BorderRadius innerBorderRadius = squareBannerShapeEnabled ? BorderRadius.zero : BorderRadius.circular(6);
+    BorderRadius borderRadius;
+    BorderRadius innerBorderRadius;
+
+    switch (appBannerShape) {
+      case 'apple_tv':
+        borderRadius = BorderRadius.circular(16);
+        innerBorderRadius = BorderRadius.circular(14);
+        break;
+      case 'roku_os':
+      case 'fire_os':
+        borderRadius = BorderRadius.zero;
+        innerBorderRadius = BorderRadius.zero;
+        break;
+      case 'web_os':
+        borderRadius = BorderRadius.circular(100);
+        innerBorderRadius = BorderRadius.circular(98);
+        break;
+      case 'google_tv':
+      default:
+        borderRadius = BorderRadius.circular(8);
+        innerBorderRadius = BorderRadius.circular(6);
+        break;
+    }
 
     return FocusKeyboardListener(
       onPressed: (key) => _onPressed(context, key),
