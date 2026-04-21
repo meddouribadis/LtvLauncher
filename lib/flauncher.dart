@@ -347,7 +347,10 @@ class _FLauncherState extends State<FLauncher> {
     }
     if (wallpaperService.wallpaper != null) {
       return Image(
-        image: wallpaperService.wallpaper!,
+        image: ResizeImage(
+          wallpaperService.wallpaper!,
+          height: physicalSize.height.toInt(),
+        ),
         key: const Key("background"),
         fit: BoxFit.cover,
         height: physicalSize.height,
