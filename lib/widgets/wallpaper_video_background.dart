@@ -59,6 +59,7 @@ class _WallpaperVideoBackgroundState extends State<WallpaperVideoBackground>
     _controller = controller;
     controller.initialize().then((_) {
       if (!mounted || _controller != controller) {
+        _controller = null;
         controller.dispose();
         return;
       }
