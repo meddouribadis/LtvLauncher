@@ -41,6 +41,8 @@ class AppCard extends StatefulWidget
   final void Function(AxisDirection) onMove;
   final VoidCallback onMoveEnd;
   final bool handleUpNavigationToSettings;
+  final bool isFirstInRow;
+  final bool isLastInRow;
 
   const AppCard({
     super.key,
@@ -50,13 +52,15 @@ class AppCard extends StatefulWidget
     required this.onMove,
     required this.onMoveEnd,
     this.handleUpNavigationToSettings = false,
+    this.isFirstInRow = false,
+    this.isLastInRow = false,
   });
 
   @override
   State<AppCard> createState() => _AppCardState();
 }
 
-class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
+class _AppCardState extends State<AppCard> with TickerProviderStateMixin {
   bool _moving = false;
   bool _clicked = false;
   late FocusNode _focusNode;
@@ -69,6 +73,16 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     ),
   );
   
+  double _bumpDirection = 0;
+  late final AnimationController _bumpController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  );
+  late final Animation<double> _bumpAnimation = TweenSequence<double>([
+    TweenSequenceItem(tween: Tween(begin: 0.0, end: 8.0).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
+    TweenSequenceItem(tween: Tween(begin: 8.0, end: 0.0).chain(CurveTween(curve: Curves.easeIn)), weight: 1),
+  ]).animate(_bumpController);
+
   AppsService? _appsService;
 
   @override
@@ -125,6 +139,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     }
     FocusManager.instance.removeHighlightModeListener(_focusHighlightModeChanged);
     _animation.dispose();
+    _bumpController.dispose();
     _focusNode.dispose();
 
     super.dispose();
@@ -175,7 +190,15 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       builder: (context) {
         final bool shouldHighlight = _shouldHighlight(context);
 
-        return AnimatedScale(
+        return AnimatedBuilder(
+          animation: _bumpAnimation,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: Offset(_bumpAnimation.value * _bumpDirection, 0),
+              child: child,
+            );
+          },
+          child: AnimatedScale(
           scale: _clicked ? 0.9 : 1.0,
           duration: const Duration(milliseconds: 150),
           curve: Curves.easeOutCubic,
@@ -338,6 +361,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
               ],
             ),
           ),
+          ),
         );
       },
     );
@@ -491,6 +515,22 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       );
 
   KeyEventResult _onPressed(BuildContext context, LogicalKeyboardKey? key) {
+    if (!_moving) {
+      if (key == LogicalKeyboardKey.arrowLeft && widget.isFirstInRow) {
+        _bumpDirection = -1.0;
+        if (!_bumpController.isAnimating) {
+          _bumpController.forward(from: 0.0);
+        }
+        return KeyEventResult.handled;
+      } else if (key == LogicalKeyboardKey.arrowRight && widget.isLastInRow) {
+        _bumpDirection = 1.0;
+        if (!_bumpController.isAnimating) {
+          _bumpController.forward(from: 0.0);
+        }
+        return KeyEventResult.handled;
+      }
+    }
+
     if (_moving) {
 
       WidgetsBinding.instance.addPostFrameCallback((_) => Scrollable.ensureVisible(context,

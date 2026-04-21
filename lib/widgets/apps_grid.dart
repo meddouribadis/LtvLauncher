@@ -57,15 +57,22 @@ class AppsGrid extends StatelessWidget
         childrenDelegate: SliverChildBuilderDelegate(
           childCount: applications.length,
           findChildIndexCallback: _findChildIndex,
-          (context, index) => AppCard(
+          (context, index) {
+            final isFirstInRow = index % category.columnsCount == 0;
+            final isLastInRow = index % category.columnsCount == category.columnsCount - 1 || index == applications.length - 1;
+
+            return AppCard(
               key: Key(applications[index].packageName),
               category: category,
               application: applications[index],
               autofocus: index == 0,
               handleUpNavigationToSettings: isFirstSection && index < category.columnsCount,
+              isFirstInRow: isFirstInRow,
+              isLastInRow: isLastInRow,
               onMove: (direction) => _onMove(context, direction, index),
               onMoveEnd: () => _saveOrder(context)
-          )
+            );
+          }
         )
       );
     }
