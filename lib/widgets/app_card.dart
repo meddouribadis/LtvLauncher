@@ -25,6 +25,7 @@ import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/widgets/application_info_panel.dart';
 import 'package:flauncher/widgets/focus_keyboard_listener.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -150,129 +151,110 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final bool showAppNames = context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
     final appImageWidget = _appImage();
+    final bool shouldHighlight = _shouldHighlight();
 
     return FocusKeyboardListener(
       onPressed: _onPressed,
       onLongPress: _onLongPress,
-      builder: (context) {
-        final bool shouldHighlight = _shouldHighlight(context);
-
-        return AnimatedScale(
-          scale: _clicked ? 0.9 : 1.0,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutCubic,
-          child: AnimatedOpacity(
-            opacity: _clicked ? 0.85 : 1.0,
+      child: AnimatedScale(
+            scale: _clicked ? 0.9 : 1.0,
             duration: const Duration(milliseconds: 150),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: RepaintBoundary(
-                      child: AnimatedScale(
-                        scale: !_moving && shouldHighlight ? 1.2 : 1.0,
-                        duration: const Duration(milliseconds: 150),
-                        alignment: Alignment.center,
-                        curve: Curves.easeInOut,
-                        //transformAlignment: Alignment.center,
-                        //transform: _scaleTransform(context),
-                        child: Material(
-                          borderRadius: BorderRadius.circular(12),
-                          clipBehavior: Clip.antiAlias,
-                          elevation: shouldHighlight ? 16 : 4,
-                          shadowColor: Colors.black,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              InkWell(
-                                focusNode: _focusNode,
-                                autofocus: widget.autofocus,
-                                focusColor: Colors.transparent,
-                                child: appImageWidget,
-                                onTap: () => _onPressed(LogicalKeyboardKey.enter),
-                                onLongPress: () => _onLongPress(LogicalKeyboardKey.enter),
-                                onFocusChange: (focused) {
-                                  _handleFocusChange(context, focused);
-                                },
-
-                              ),
-                              if (_moving) ..._arrows(),
-                              // const IgnorePointer(
-                              //   child: DecoratedBox(
-                              //     decoration: BoxDecoration(
-                              //       gradient: LinearGradient(
-                              //         begin: Alignment.topCenter,
-                              //         end: Alignment.bottomCenter,
-                              //         stops: [0.0, 0.5, 1.0],
-                              //         colors: [
-                              //           Color(0x1AFFFFFF),
-                              //           Color(0xDFFFFFF),
-                              //           Colors.black12,
-                              //         ],
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
-                              IgnorePointer(
-                                child: AnimatedOpacity(
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.easeInOut,
-                                  opacity: shouldHighlight ? 0.0 : 1.0,
-                                  child: const ColoredBox(color: Color(0x1A000000)),
+            curve: Curves.easeOutCubic,
+            child: AnimatedOpacity(
+              opacity: _clicked ? 0.85 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: RepaintBoundary(
+                        child: AnimatedScale(
+                          scale: !_moving && shouldHighlight ? 1.2 : 1.0,
+                          duration: const Duration(milliseconds: 150),
+                          alignment: Alignment.center,
+                          curve: Curves.easeInOut,
+                          child: Material(
+                            borderRadius: BorderRadius.circular(12),
+                            clipBehavior: Clip.antiAlias,
+                            elevation: shouldHighlight ? 16 : 4,
+                            shadowColor: Colors.black,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                InkWell(
+                                  focusNode: _focusNode,
+                                  autofocus: widget.autofocus,
+                                  focusColor: Colors.transparent,
+                                  child: appImageWidget,
+                                  onTap: () => _onPressed(LogicalKeyboardKey.enter),
+                                  onLongPress: () => _onLongPress(LogicalKeyboardKey.enter),
+                                  onFocusChange: (focused) {
+                                    _handleFocusChange(context, focused);
+                                  },
                                 ),
-                              ),
-                              Selector<SettingsService, (bool, String)>(
-                                selector: (_, settingsService) => (settingsService.appHighlightAnimationEnabled, settingsService.accentColorHex),
-                                builder: (context, settings, _) {
-                                  final (animationEnabled, accentColorHex) = settings;
-                                  final accentColor = Color(int.parse('FF$accentColorHex', radix: 16));
-                                  _setHighlightAnimation(shouldHighlight && animationEnabled);
+                                if (_moving) ..._arrows(),
+                                IgnorePointer(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeInOut,
+                                    opacity: shouldHighlight ? 0.0 : 1.0,
+                                    child: const ColoredBox(color: Color(0x1A000000)),
+                                  ),
+                                ),
+                                Selector<SettingsService, (bool, String)>(
+                                  selector: (_, settingsService) => (
+                                    settingsService.appHighlightAnimationEnabled,
+                                    settingsService.accentColorHex,
+                                  ),
+                                  builder: (context, settings, _) {
+                                    final (animationEnabled, accentColorHex) = settings;
+                                    final accentColor = Color(int.parse('FF$accentColorHex', radix: 16));
+                                    _setHighlightAnimation(shouldHighlight && animationEnabled);
 
-                                  if (shouldHighlight) {
-                                    if (animationEnabled) {
-                                      return AnimatedBuilder(
-                                        animation: _curvedAnimation,
-                                        child: IgnorePointer(
+                                    if (shouldHighlight) {
+                                      if (animationEnabled) {
+                                        return AnimatedBuilder(
+                                          animation: _curvedAnimation,
+                                          child: IgnorePointer(
+                                            child: RepaintBoundary(
+                                              child: _HighlightOutline(color: accentColor),
+                                            ),
+                                          ),
+                                          builder: (context, child) {
+                                            final opacity = 0.4 + (_animation.value * 0.6);
+                                            return Opacity(opacity: opacity, child: child);
+                                          },
+                                        );
+                                      } else {
+                                        return IgnorePointer(
                                           child: RepaintBoundary(
                                             child: _HighlightOutline(color: accentColor),
                                           ),
-                                        ),
-                                        builder: (context, child) {
-                                          final opacity = 0.4 + (_animation.value * 0.6);
-                                          return Opacity(opacity: opacity, child: child);
-                                        },
-                                      );
-                                    } else {
-                                      return IgnorePointer(
-                                        child: RepaintBoundary(
-                                          child: _HighlightOutline(color: accentColor),
-                                        ),
-                                      );
+                                        );
+                                      }
                                     }
-                                  }
 
-                                  return const SizedBox();
-                                },
-                              ),
-                            ],
+                                    return const SizedBox();
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                if (showAppNames)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: _AppNameLabel(name: widget.application.name),
-                  ),
-              ],
+                  if (showAppNames)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: _AppNameLabel(name: widget.application.name),
+                    ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+      ),
     );
   }
 
@@ -442,8 +424,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     });
   }
 
-  bool _shouldHighlight(BuildContext context)
-  {
+  bool _shouldHighlight() {
     return _isTraditionalHighlightMode && _isFocused;
   }
 
@@ -463,7 +444,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       return;
     }
     _lastEnsureVisibleAt = now;
-    Scrollable.ensureVisible(
+    _ensureVisibleIfNeeded(
       context,
       // This specific alignment value is not only
       // to center the focused card in the row while
@@ -472,8 +453,6 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
       // scrolling from the app bar. How it relates to this,
       // I don't know
       alignment: widget.scrollAlignment,
-      curve: Curves.easeInOut,
-      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -487,6 +466,33 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     } else {
       _animation.stop();
     }
+  }
+
+  void _ensureVisibleIfNeeded(BuildContext context, {required double alignment}) {
+    final renderObject = context.findRenderObject();
+    final scrollable = Scrollable.maybeOf(context);
+    if (renderObject == null || scrollable == null) {
+      return;
+    }
+
+    final viewport = RenderAbstractViewport.of(renderObject);
+    if (viewport == null) {
+      return;
+    }
+
+    final position = scrollable.position;
+    final targetOffset = viewport.getOffsetToReveal(renderObject, alignment).offset;
+    const minDeltaToScroll = 24.0;
+    if ((targetOffset - position.pixels).abs() < minDeltaToScroll) {
+      return;
+    }
+
+    Scrollable.ensureVisible(
+      context,
+      alignment: alignment,
+      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 220),
+    );
   }
 
   List<Widget> _arrows() {
@@ -562,12 +568,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
         if (_lastEnsureVisibleAt == null || nowForScroll.difference(_lastEnsureVisibleAt!).inMilliseconds >= 120) {
           _lastEnsureVisibleAt = nowForScroll;
           WidgetsBinding.instance.addPostFrameCallback(
-            (_) => Scrollable.ensureVisible(
-              context,
-              alignment: 0.1,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            ),
+            (_) => _ensureVisibleIfNeeded(context, alignment: 0.1),
           );
         }
       }
