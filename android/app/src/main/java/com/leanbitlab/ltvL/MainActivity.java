@@ -31,9 +31,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Pair;
+import android.media.tv.TvContract;
+import android.database.Cursor;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
+import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,6 +72,8 @@ public class MainActivity extends FlutterActivity {
     private final String METHOD_CHANNEL = "me.efesser.flauncher/method";
     private final String APPS_EVENT_CHANNEL = "me.efesser.flauncher/event_apps";
     private final String NETWORK_EVENT_CHANNEL = "me.efesser.flauncher/event_network";
+    private static final String PERMISSION_READ_TV_LISTINGS = "android.permission.READ_TV_LISTINGS";
+    private static final String COLUMN_ASPECT_RATIO = "aspect_ratio";
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -136,6 +141,30 @@ public class MainActivity extends FlutterActivity {
                     result.success(setSystemBrightness(brightness));
                 }
                 case "openWifiSettings" -> result.success(openWifiSettings());
+                case "getWatchNextItems" -> {
+                    int limit = call.arguments() != null ? (int) call.arguments() : 10;
+                    result.success(getWatchNextItems(limit));
+                }
+                case "launchWatchNextItem" -> {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> args = (Map<String, Object>) call.arguments();
+                    if (args != null) {
+                        String packageName = (String) args.get("packageName");
+                        String contentId = (String) args.get("contentId");
+                        String action = (String) args.get("action");
+                        result.success(launchWatchNextItem(packageName, contentId, action));
+                    } else {
+                        result.success(false);
+                    }
+                }
+                case "loadContentUriImage" -> {
+                    String contentUri = (String) call.arguments();
+                    if (contentUri != null) {
+                        result.success(loadContentUriImage(contentUri));
+                    } else {
+                        result.success(new byte[0]);
+                    }
+                }
                 default -> throw new IllegalArgumentException();
             }
         });
@@ -628,7 +657,7 @@ public class MainActivity extends FlutterActivity {
                 return true;
             } catch (Exception e) {
                 // Ignore errors on specific keys as they may not exist
-                return true; 
+                return true;
             }
         }
         return false;
@@ -684,6 +713,215 @@ public class MainActivity extends FlutterActivity {
 
         // 4. Final fallback - open main settings
         return launchActivityFromAction(Settings.ACTION_SETTINGS);
+    }
+
+    private List<Map<String, Object>> getWatchNextItems(int limit) {
+        List<Map<String, Object>> items = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(PERMISSION_READ_TV_LISTINGS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                android.util.Log.w("MainActivity", "READ_TV_LISTINGS permission not granted");
+                return items;
+            }
+        }
+
+        try {
+            String[] projection = {
+                TvContract.WatchNextPrograms._ID,
+                TvContract.WatchNextPrograms.COLUMN_TITLE,
+                TvContract.WatchNextPrograms.COLUMN_SHORT_DESCRIPTION,
+                TvContract.WatchNextPrograms.COLUMN_POSTER_ART_URI,
+                TvContract.WatchNextPrograms.COLUMN_PACKAGE_NAME,
+                TvContract.WatchNextPrograms.COLUMN_INTERNAL_PROVIDER_ID,
+                TvContract.WatchNextPrograms.COLUMN_DURATION_MILLIS,
+                TvContract.WatchNextPrograms.COLUMN_LAST_ENGAGEMENT_TIME_UTC_MILLIS,
+                TvContract.WatchNextPrograms.COLUMN_INTENT_URI,
+                TvContract.WatchNextPrograms.COLUMN_WATCH_NEXT_TYPE
+            };
+
+            String sortOrder = TvContract.WatchNextPrograms.COLUMN_LAST_ENGAGEMENT_TIME_UTC_MILLIS + " DESC";
+
+            try (Cursor cursor = getContentResolver().query(
+                    TvContract.WatchNextPrograms.CONTENT_URI,
+                    projection,
+                    null,
+                    null,
+                    sortOrder)) {
+
+                if (cursor != null && cursor.moveToFirst()) {
+                    int count = 0;
+                    int fetchLimit = Math.max(limit * 3, 30);
+
+                    do {
+                        try {
+                            Map<String, Object> item = new HashMap<>();
+
+                            int idIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms._ID);
+                            int titleIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_TITLE);
+                            int descIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_SHORT_DESCRIPTION);
+                            int posterIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_POSTER_ART_URI);
+                            int pkgIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_PACKAGE_NAME);
+                            int contentIdIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_INTERNAL_PROVIDER_ID);
+                            int durationIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_DURATION_MILLIS);
+                            int lastEngIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_LAST_ENGAGEMENT_TIME_UTC_MILLIS);
+                            int intentUriIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_INTENT_URI);
+                            int watchTypeIndex = cursor.getColumnIndex(TvContract.WatchNextPrograms.COLUMN_WATCH_NEXT_TYPE);
+                            int aspectRatioIndex = cursor.getColumnIndex(COLUMN_ASPECT_RATIO);
+
+                            String title = (titleIndex >= 0 && !cursor.isNull(titleIndex))
+                                ? cursor.getString(titleIndex) : null;
+                            if (title == null || title.isEmpty()) {
+                                continue;
+                            }
+
+                            item.put("id", idIndex >= 0 ? cursor.getLong(idIndex) : 0);
+                            item.put("title", title);
+                            item.put("description", (descIndex >= 0 && !cursor.isNull(descIndex))
+                                ? cursor.getString(descIndex) : null);
+                            item.put("posterUri", (posterIndex >= 0 && !cursor.isNull(posterIndex))
+                                ? cursor.getString(posterIndex) : null);
+                            item.put("packageName", (pkgIndex >= 0 && !cursor.isNull(pkgIndex))
+                                ? cursor.getString(pkgIndex) : null);
+                            item.put("contentId", (contentIdIndex >= 0 && !cursor.isNull(contentIdIndex))
+                                ? cursor.getString(contentIdIndex) : null);
+                            item.put("duration", (durationIndex >= 0 && !cursor.isNull(durationIndex))
+                                ? cursor.getInt(durationIndex) : null);
+
+                            item.put("intentUri", (intentUriIndex >= 0 && !cursor.isNull(intentUriIndex))
+                                ? cursor.getString(intentUriIndex) : null);
+
+                            item.put("watchNextType", (watchTypeIndex >= 0 && !cursor.isNull(watchTypeIndex))
+                                ? cursor.getInt(watchTypeIndex) : 0);
+
+                            item.put("aspectRatio", (aspectRatioIndex >= 0 && !cursor.isNull(aspectRatioIndex))
+                                ? cursor.getString(aspectRatioIndex) : null);
+
+                            if (lastEngIndex >= 0 && !cursor.isNull(lastEngIndex)) {
+                                item.put("lastEngagementDate", cursor.getLong(lastEngIndex));
+                            }
+
+                            item.put("progressPercent", 0);
+
+                            items.add(item);
+                            count++;
+                        } catch (Exception rowEx) {
+                            android.util.Log.w("MainActivity", "Error parsing Watch Next row", rowEx);
+                        }
+                    } while (cursor.moveToNext() && count < fetchLimit);
+                }
+            }
+        } catch (SecurityException e) {
+            android.util.Log.w("MainActivity", "SecurityException when querying Watch Next: " + e.getMessage());
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Error querying Watch Next", e);
+        }
+
+        return items.subList(0, Math.min(items.size(), limit));
+    }
+
+    private boolean launchWatchNextItem(String packageName, String contentId, String action) {
+        android.util.Log.d("MainActivity", "launchWatchNextItem: packageName=" + packageName + ", contentId=" + contentId + ", action=" + action);
+
+        // Try to use the intent action/uri from arguments first
+        if (action != null && !action.isEmpty()) {
+            try {
+                Intent intent;
+                if (action.startsWith("intent://")) {
+                    android.util.Log.d("MainActivity", "Parsing intent URI: " + action);
+                    intent = Intent.parseUri(action, Intent.URI_INTENT_SCHEME);
+                } else if (action.startsWith("content://") || action.startsWith("http://") || action.startsWith("https://")) {
+                    android.util.Log.d("MainActivity", "Creating VIEW intent for URI: " + action);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(action));
+                } else if (action.contains(":")) {
+                    try {
+                        android.util.Log.d("MainActivity", "Trying to parse as intent URI: " + action);
+                        intent = Intent.parseUri(action, Intent.URI_INTENT_SCHEME);
+                    } catch (Exception e) {
+                        android.util.Log.w("MainActivity", "Failed to parse as intent URI, treating as action: " + action);
+                        intent = new Intent(action);
+                    }
+                } else {
+                    android.util.Log.d("MainActivity", "Creating intent with action: " + action);
+                    intent = new Intent(action);
+                }
+
+                if (packageName != null) {
+                    intent.setPackage(packageName);
+                    android.util.Log.d("MainActivity", "Set package to: " + packageName);
+                }
+                if (contentId != null) {
+                    intent.putExtra("contentId", contentId);
+                    android.util.Log.d("MainActivity", "Added contentId extra: " + contentId);
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                android.util.Log.d("MainActivity", "Starting activity with intent: " + intent.toUri(0));
+                return tryStartActivity(intent);
+            } catch (Exception e) {
+                android.util.Log.e("MainActivity", "Failed to launch with action/uri: " + action, e);
+            }
+        }
+
+        // Fallback to package name
+        if (packageName == null) {
+            android.util.Log.w("MainActivity", "No package name or action available, cannot launch");
+            return false;
+        }
+
+        try {
+            android.util.Log.d("MainActivity", "Falling back to package launch: " + packageName);
+            PackageManager pm = getPackageManager();
+            Intent intent = pm.getLeanbackLaunchIntentForPackage(packageName);
+            if (intent == null) {
+                intent = pm.getLaunchIntentForPackage(packageName);
+            }
+
+            if (intent != null) {
+                if (contentId != null) {
+                    intent.putExtra("contentId", contentId);
+                }
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                return tryStartActivity(intent);
+            } else {
+                android.util.Log.w("MainActivity", "No launch intent found for package: " + packageName);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Error launching Watch Next item for package: " + packageName, e);
+        }
+
+        return false;
+    }
+
+    /**
+     * Load image bytes from a content:// URI
+     */
+    private byte[] loadContentUriImage(String contentUri) {
+        android.util.Log.d("MainActivity", "Loading content URI image: " + contentUri);
+        try {
+            android.net.Uri uri = android.net.Uri.parse(contentUri);
+            android.util.Log.d("MainActivity", "Parsed URI: " + uri);
+
+            try (java.io.InputStream inputStream = getContentResolver().openInputStream(uri)) {
+                if (inputStream != null) {
+                    java.io.ByteArrayOutputStream byteArrayOutputStream = new java.io.ByteArrayOutputStream();
+                    byte[] buffer = new byte[8192];  // Increased buffer size
+                    int length;
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        byteArrayOutputStream.write(buffer, 0, length);
+                    }
+                    byte[] result = byteArrayOutputStream.toByteArray();
+                    android.util.Log.d("MainActivity", "Loaded " + result.length + " bytes from content URI");
+                    return result;
+                } else {
+                    android.util.Log.w("MainActivity", "openInputStream returned null for: " + contentUri);
+                }
+            }
+        } catch (SecurityException e) {
+            android.util.Log.w("MainActivity", "SecurityException loading content URI: " + e.getMessage());
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Error loading content URI image: " + contentUri, e);
+        }
+        android.util.Log.w("MainActivity", "Returning empty byte array for: " + contentUri);
+        return new byte[0];
     }
 
 }
