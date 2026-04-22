@@ -22,13 +22,13 @@ import 'package:flutter/services.dart';
 const longPressableKeys = [LogicalKeyboardKey.select, LogicalKeyboardKey.enter, LogicalKeyboardKey.gameButtonA];
 
 class FocusKeyboardListener extends StatefulWidget {
-  final WidgetBuilder builder;
+  final Widget child;
   final KeyEventResult Function(LogicalKeyboardKey)? onPressed;
   final KeyEventResult Function(LogicalKeyboardKey)? onLongPress;
 
   FocusKeyboardListener({
     Key? key,
-    required this.builder,
+    required this.child,
     this.onPressed,
     this.onLongPress,
   }) : super(key: key);
@@ -46,7 +46,7 @@ class _FocusKeyboardListenerState extends State<FocusKeyboardListener> {
         // Using "onKeyEvent", in favor of the deprecated "onKey"
         // seems to break the fix for issue #21 so, keep using the old property
         onKey: (_, rawKeyEvent) => _handleKey(context, rawKeyEvent),
-        child: Builder(builder: widget.builder),
+        child: widget.child,
       );
 
   KeyEventResult _handleKey(BuildContext context, RawKeyEvent rawKeyEvent) {
