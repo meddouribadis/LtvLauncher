@@ -54,6 +54,12 @@ class MiscPanelPage extends StatelessWidget {
                 title: Text("Disable Dock Backdrop Blur", style: Theme.of(context).textTheme.bodyMedium),
                 secondary: Icon(Icons.blur_off),
               ),
+              RoundedSwitchListTile(
+                value: settingsService.showWatchNextSection,
+                onChanged: (value) => settingsService.setShowWatchNextSection(value),
+                title: Text("Show Watch Next Section", style: Theme.of(context).textTheme.bodyMedium),
+                secondary: Icon(Icons.play_circle_outline),
+              ),
             ],
           ),
         ),
