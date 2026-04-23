@@ -22,23 +22,23 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../providers/settings_service.dart';
 
-class AppBannerShapePage extends StatelessWidget {
-  static const String routeName = "app_banner_shape_panel";
+class ThemesPage extends StatelessWidget {
+  static const String routeName = "themes_panel";
 
-  const AppBannerShapePage({super.key});
+  const ThemesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     AppLocalizations localizations = AppLocalizations.of(context)!;
 
     return Selector<SettingsService, String>(
-      selector: (_, settingsService) => settingsService.appBannerShape,
+      selector: (_, settingsService) => settingsService.themes,
       builder: (context, currentShape, _) {
         final settingsService = context.read<SettingsService>();
 
         return Column(
           children: [
-            Text(localizations.appBannerShape, style: Theme.of(context).textTheme.titleLarge),
+            Text(localizations.themes, style: Theme.of(context).textTheme.titleLarge),
             const Divider(),
             Expanded(
               child: SingleChildScrollView(

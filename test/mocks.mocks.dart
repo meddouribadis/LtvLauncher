@@ -1308,11 +1308,11 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as bool);
 
   @override
-  String get appBannerShape => (super.noSuchMethod(
-        Invocation.getter(#appBannerShape),
+  String get themes => (super.noSuchMethod(
+        Invocation.getter(#themes),
         returnValue: _i18.dummyValue<String>(
           this,
-          Invocation.getter(#appBannerShape),
+          Invocation.getter(#themes),
         ),
       ) as String);
 
@@ -1533,9 +1533,9 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as _i9.Future<void>);
 
   @override
-  _i9.Future<void> setAppBannerShape(String? shape) => (super.noSuchMethod(
+  _i9.Future<void> setThemes(String? shape) => (super.noSuchMethod(
         Invocation.method(
-          #setAppBannerShape,
+          #setThemes,
           [shape],
         ),
         returnValue: _i9.Future<void>.value(),

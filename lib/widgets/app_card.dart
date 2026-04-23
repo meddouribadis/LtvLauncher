@@ -156,28 +156,27 @@ class _AppCardState extends State<AppCard> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final bool showAppNames = context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
-    final String appBannerShape = context.select<SettingsService, String>((s) => s.appBannerShape);
+    final String themes = context.select<SettingsService, String>((s) => s.themes);
     final bool hideHighlightOutlineOnHomescreen = context.select<SettingsService, bool>((s) => s.hideHighlightOutlineOnHomescreen);
     final bool appSelectorTransitionAnimationEnabled = context.select<SettingsService, bool>((s) => s.appSelectorTransitionAnimationEnabled);
 
     BorderRadius borderRadius;
     BorderRadius innerBorderRadius;
 
-    switch (appBannerShape) {
-      case 'apple_tv':
+    switch (themes) {
+      case 'soft':
         borderRadius = BorderRadius.circular(16);
         innerBorderRadius = BorderRadius.circular(14);
         break;
-      case 'roku_os':
-      case 'fire_os':
+      case 'classic':
         borderRadius = BorderRadius.zero;
         innerBorderRadius = BorderRadius.zero;
         break;
-      case 'web_os':
+      case 'pill':
         borderRadius = BorderRadius.circular(100);
         innerBorderRadius = BorderRadius.circular(98);
         break;
-      case 'google_tv':
+      case 'modern':
       default:
         borderRadius = BorderRadius.circular(8);
         innerBorderRadius = BorderRadius.circular(6);
@@ -216,11 +215,11 @@ class _AppCardState extends State<AppCard> with TickerProviderStateMixin {
                         duration: appSelectorTransitionAnimationEnabled ? const Duration(milliseconds: 200) : Duration.zero,
                         curve: Curves.easeInOut,
                         transformAlignment: Alignment.center,
-                        transform: _scaleTransform(context),
+                        transform: _scaleTransform(context, themes),
                         child: Material(
                           borderRadius: borderRadius,
                           clipBehavior: Clip.antiAlias,
-                          elevation: shouldHighlight ? 16 : 0,
+                          elevation: shouldHighlight ? (themes == 'soft' ? 32 : (themes == 'classic' ? 8 : 16)) : 0,
                           shadowColor: Colors.black,
                           child: Stack(
                             fit: StackFit.expand,
@@ -264,6 +263,29 @@ class _AppCardState extends State<AppCard> with TickerProviderStateMixin {
                                   final accentColor = Color(int.parse('FF$accentColorHex', radix: 16));
 
                                   if (shouldHighlight && !hideHighlightOutlineOnHomescreen) {
+                                    if (themes == 'soft') {
+                                      _animation.stop();
+                                      return const SizedBox();
+                                    }
+                                    if (themes == 'classic') {
+                                      _animation.stop();
+                                      return IgnorePointer(
+                                        child: Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: borderRadius,
+                                                border: Border.all(
+                                                  color: accentColor,
+                                                  width: 4
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
                                     if (animationEnabled) {
                                       _animation.repeat(reverse: true);
                                       return AnimatedBuilder(
@@ -463,10 +485,16 @@ class _AppCardState extends State<AppCard> with TickerProviderStateMixin {
     return FocusManager.instance.highlightMode == FocusHighlightMode.traditional && Focus.of(context).hasFocus;
   }
 
-  Matrix4 _scaleTransform(BuildContext context) {
+  Matrix4 _scaleTransform(BuildContext context, String theme) {
     double scale = 1.0;
     if (!_moving && _shouldHighlight(context)) {
-      scale = 1.1;
+      if (theme == 'soft') {
+        scale = 1.15;
+      } else if (theme == 'classic') {
+        scale = 1.0;
+      } else {
+        scale = 1.1;
+      }
     }
     return Matrix4.diagonal3Values(scale, scale, 1.0);
   }

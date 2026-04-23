@@ -2,7 +2,6 @@
 import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/widgets/rounded_switch_list_tile.dart';
 import 'package:flauncher/widgets/settings/focusable_settings_tile.dart';
-import 'package:flauncher/widgets/settings/app_banner_shape_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -51,9 +50,6 @@ class MiscPanelPage extends StatelessWidget {
                 secondary: Icon(Icons.subtitles),
               ),
               FocusableSettingsTile(
-                leading: Icon(Icons.crop_square),
-                title: Text(localizations.appBannerShape, style: Theme.of(context).textTheme.bodyMedium),
-                onPressed: () => Navigator.of(context).pushNamed(AppBannerShapePage.routeName),
               ),
               RoundedSwitchListTile(
                 value: settingsService.hideHighlightOutlineOnHomescreen,
