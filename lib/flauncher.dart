@@ -352,16 +352,15 @@ class _FLauncherState extends State<FLauncher> {
         width: physicalSize.width,
         height: physicalSize.height,
         child: WallpaperVideoBackground(
-            key: Key("background_video"), file: videoFile),
+          key: ValueKey("background_video_${wallpaperService.wallpaperRevision}"),
+          file: videoFile,
+        ),
       );
     }
     if (wallpaperService.wallpaper != null) {
       return Image(
-        image: ResizeImage(
-          wallpaperService.wallpaper!,
-          height: physicalSize.height.toInt(),
-        ),
-        key: const Key("background"),
+        image: wallpaperService.wallpaper!,
+        key: ValueKey("background_${wallpaperService.wallpaperRevision}"),
         fit: BoxFit.cover,
         height: physicalSize.height,
         width: physicalSize.width,
