@@ -63,7 +63,7 @@ class NetworkService extends ChangeNotifier
   CellularNetworkType _cellularNetworkType;
   NetworkType         _networkType;
   int                 _wirelessNetworkSignalLevel;
-  int                 _dailyWifiUsage; // In bytes
+  int                 _dailyDataUsage; // In bytes
   bool                _hasUsageStatsPermission;
   Timer?              _usageTimer;
 
@@ -73,7 +73,7 @@ class NetworkService extends ChangeNotifier
         _cellularNetworkType = CellularNetworkType.Unknown,
         _networkType = NetworkType.Unknown,
         _wirelessNetworkSignalLevel = 0,
-        _dailyWifiUsage = 0,
+        _dailyDataUsage = 0,
         _hasUsageStatsPermission = false
   {
     _channel.addNetworkChangedListener(_onNetworkChanged);
@@ -126,23 +126,23 @@ class NetworkService extends ChangeNotifier
   Future<void> _fetchUsage() async {
      // This will be called with the current period from the widget
      // For now, default to daily
-     int usage = await _channel.getDailyWifiUsage();
+     int usage = await _channel.getDailyDataUsage();
      if (usage != -1) {
-       _dailyWifiUsage = usage;
+       _dailyDataUsage = usage;
        notifyListeners();
      }
   }
 
-  Future<int> getWifiUsageForPeriod(String period) async {
+  Future<int> getDataUsageForPeriod(String period) async {
     switch (period) {
       case 'daily':
-        return await _channel.getDailyWifiUsage();
+        return await _channel.getDailyDataUsage();
       case 'weekly':
-        return await _channel.getWeeklyWifiUsage();
+        return await _channel.getWeeklyDataUsage();
       case 'monthly':
-        return await _channel.getMonthlyWifiUsage();
+        return await _channel.getMonthlyDataUsage();
       default:
-        return await _channel.getDailyWifiUsage();
+        return await _channel.getDailyDataUsage();
     }
   }
 
@@ -156,7 +156,7 @@ class NetworkService extends ChangeNotifier
   CellularNetworkType   get   cellularNetworkType           => _cellularNetworkType;
   NetworkType           get   networkType                   => _networkType;
   int                   get   wirelessNetworkSignalLevel    => _wirelessNetworkSignalLevel;
-  int                 get   dailyWifiUsage                => _dailyWifiUsage;
+  int                 get   dailyDataUsage                => _dailyDataUsage;
   bool                get   hasUsageStatsPermission       => _hasUsageStatsPermission;
 
   CellularNetworkType _getCellularNetworkType(int index)

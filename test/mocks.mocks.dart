@@ -466,27 +466,27 @@ class MockFLauncherChannel extends _i1.Mock implements _i12.FLauncherChannel {
       ) as _i9.Future<Map<String, dynamic>>);
 
   @override
-  _i9.Future<int> getDailyWifiUsage() => (super.noSuchMethod(
+  _i9.Future<int> getDailyDataUsage() => (super.noSuchMethod(
         Invocation.method(
-          #getDailyWifiUsage,
+          #getDailyDataUsage,
           [],
         ),
         returnValue: _i9.Future<int>.value(0),
       ) as _i9.Future<int>);
 
   @override
-  _i9.Future<int> getWeeklyWifiUsage() => (super.noSuchMethod(
+  _i9.Future<int> getWeeklyDataUsage() => (super.noSuchMethod(
         Invocation.method(
-          #getWeeklyWifiUsage,
+          #getWeeklyDataUsage,
           [],
         ),
         returnValue: _i9.Future<int>.value(0),
       ) as _i9.Future<int>);
 
   @override
-  _i9.Future<int> getMonthlyWifiUsage() => (super.noSuchMethod(
+  _i9.Future<int> getMonthlyDataUsage() => (super.noSuchMethod(
         Invocation.method(
-          #getMonthlyWifiUsage,
+          #getMonthlyDataUsage,
           [],
         ),
         returnValue: _i9.Future<int>.value(0),
@@ -1368,17 +1368,17 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as String);
 
   @override
-  String get wifiUsagePeriod => (super.noSuchMethod(
-        Invocation.getter(#wifiUsagePeriod),
+  String get dataUsagePeriod => (super.noSuchMethod(
+        Invocation.getter(#dataUsagePeriod),
         returnValue: _i18.dummyValue<String>(
           this,
-          Invocation.getter(#wifiUsagePeriod),
+          Invocation.getter(#dataUsagePeriod),
         ),
       ) as String);
 
   @override
-  bool get showWifiWidgetInStatusBar => (super.noSuchMethod(
-        Invocation.getter(#showWifiWidgetInStatusBar),
+  bool get showDataWidgetInStatusBar => (super.noSuchMethod(
+        Invocation.getter(#showDataWidgetInStatusBar),
         returnValue: false,
       ) as bool);
 
@@ -1585,9 +1585,9 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as _i9.Future<void>);
 
   @override
-  _i9.Future<void> setWifiUsagePeriod(String? period) => (super.noSuchMethod(
+  _i9.Future<void> setDataUsagePeriod(String? period) => (super.noSuchMethod(
         Invocation.method(
-          #setWifiUsagePeriod,
+          #setDataUsagePeriod,
           [period],
         ),
         returnValue: _i9.Future<void>.value(),
@@ -1595,10 +1595,10 @@ class MockSettingsService extends _i1.Mock implements _i17.SettingsService {
       ) as _i9.Future<void>);
 
   @override
-  _i9.Future<void> setShowWifiWidgetInStatusBar(bool? show) =>
+  _i9.Future<void> setShowDataWidgetInStatusBar(bool? show) =>
       (super.noSuchMethod(
         Invocation.method(
-          #setShowWifiWidgetInStatusBar,
+          #setShowDataWidgetInStatusBar,
           [show],
         ),
         returnValue: _i9.Future<void>.value(),

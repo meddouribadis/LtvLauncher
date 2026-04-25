@@ -37,16 +37,16 @@ const _appSelectorTransitionAnimationEnabled = "app_selector_transition_animatio
 const _showDateInStatusBar = "show_date_in_status_bar";
 const _showTimeInStatusBar = "show_time_in_status_bar";
 const _timeFormat = "time_format";
-const _wifiUsagePeriod = "wifi_usage_period";
-const _showWifiWidgetInStatusBar = "show_wifi_widget_in_status_bar";
+const _dataUsagePeriod = "wifi_usage_period";
+const _showDataWidgetInStatusBar = "show_wifi_widget_in_status_bar";
 const String _showNetworkIndicatorInStatusBar = "show_network_indicator_in_status_bar";
 const String _accentColor = "accent_color";
 const String _screensaverClockStyle = "screensaver_clock_style";
 
 // WiFi usage period options
-const String WIFI_USAGE_DAILY = "daily";
-const String WIFI_USAGE_WEEKLY = "weekly";
-const String WIFI_USAGE_MONTHLY = "monthly";
+const String DATA_USAGE_DAILY = "daily";
+const String DATA_USAGE_WEEKLY = "weekly";
+const String DATA_USAGE_MONTHLY = "monthly";
 
 // Accent color presets (hex values)
 const String ACCENT_COLOR_PURPLE = "7C4DFF";
@@ -99,9 +99,9 @@ class SettingsService extends ChangeNotifier {
 
   String get timeFormat => _sharedPreferences.getString(_timeFormat) ?? defaultTimeFormat;
 
-  String get wifiUsagePeriod => _sharedPreferences.getString(_wifiUsagePeriod) ?? WIFI_USAGE_DAILY;
+  String get dataUsagePeriod => _sharedPreferences.getString(_dataUsagePeriod) ?? DATA_USAGE_DAILY;
 
-  bool get showWifiWidgetInStatusBar => _sharedPreferences.getBool(_showWifiWidgetInStatusBar) ?? true;
+  bool get showDataWidgetInStatusBar => _sharedPreferences.getBool(_showDataWidgetInStatusBar) ?? true;
 
   bool get showNetworkIndicatorInStatusBar => _sharedPreferences.getBool(_showNetworkIndicatorInStatusBar) ?? true;
 
@@ -182,13 +182,13 @@ class SettingsService extends ChangeNotifier {
     return set(_showTimeInStatusBar, show);
   }
 
-  Future<void> setWifiUsagePeriod(String period) async {
-    await _sharedPreferences.setString(_wifiUsagePeriod, period);
+  Future<void> setDataUsagePeriod(String period) async {
+    await _sharedPreferences.setString(_dataUsagePeriod, period);
     notifyListeners();
   }
 
-  Future<void> setShowWifiWidgetInStatusBar(bool show) async {
-    return set(_showWifiWidgetInStatusBar, show);
+  Future<void> setShowDataWidgetInStatusBar(bool show) async {
+    return set(_showDataWidgetInStatusBar, show);
   }
 
   Future<void> setShowNetworkIndicatorInStatusBar(bool show) async {

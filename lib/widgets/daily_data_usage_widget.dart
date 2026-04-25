@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class DailyWifiUsageWidget extends StatelessWidget {
-  const DailyWifiUsageWidget({super.key});
+class DailyDataUsageWidget extends StatelessWidget {
+  const DailyDataUsageWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class DailyWifiUsageWidget extends StatelessWidget {
           );
         }
 
-        final period = settingsService.wifiUsagePeriod;
+        final period = settingsService.dataUsagePeriod;
         String label;
         switch (period) {
           case 'weekly':
@@ -35,9 +35,9 @@ class DailyWifiUsageWidget extends StatelessWidget {
         }
 
         return FutureBuilder<int>(
-          future: networkService.getWifiUsageForPeriod(period),
+          future: networkService.getDataUsageForPeriod(period),
           builder: (context, snapshot) {
-            final usage = snapshot.data ?? networkService.dailyWifiUsage;
+            final usage = snapshot.data ?? networkService.dailyDataUsage;
             final usageString = _formatBytes(usage);
 
             return RichText(

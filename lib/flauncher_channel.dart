@@ -60,27 +60,27 @@ class FLauncherChannel {
     return map.cast<String, dynamic>();
   }
 
-  Future<int> getDailyWifiUsage() async {
+  Future<int> getDailyDataUsage() async {
     try {
-      final int usage = await _methodChannel.invokeMethod("getDailyWifiUsage");
+      final int usage = await _methodChannel.invokeMethod("getDailyDataUsage");
       return usage;
     } on PlatformException catch (_) {
       return -1;
     }
   }
 
-  Future<int> getWeeklyWifiUsage() async {
+  Future<int> getWeeklyDataUsage() async {
     try {
-      final int usage = await _methodChannel.invokeMethod("getWeeklyWifiUsage");
+      final int usage = await _methodChannel.invokeMethod("getWeeklyDataUsage");
       return usage;
     } on PlatformException catch (_) {
       return -1;
     }
   }
 
-  Future<int> getMonthlyWifiUsage() async {
+  Future<int> getMonthlyDataUsage() async {
     try {
-      final int usage = await _methodChannel.invokeMethod("getMonthlyWifiUsage");
+      final int usage = await _methodChannel.invokeMethod("getMonthlyDataUsage");
       return usage;
     } on PlatformException catch (_) {
       return -1;

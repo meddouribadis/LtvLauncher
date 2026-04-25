@@ -23,7 +23,7 @@ import 'focusable_settings_tile.dart';
 import 'brightness_settings_page.dart';
 import 'date_time_format_page.dart';
 import 'back_button_action_page.dart';
-import 'wifi_usage_period_page.dart';
+import 'data_usage_period_page.dart';
 import 'screensaver_clock_style_page.dart';
 
 
@@ -71,9 +71,9 @@ class GeneralSettingsPage extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pushNamed(BackButtonActionPage.routeName),
                 ),
                 FocusableSettingsTile(
-                  leading: const Icon(Icons.wifi),
-                  title: Text('WiFi Usage Period', style: Theme.of(context).textTheme.bodyMedium),
-                  onPressed: () => Navigator.of(context).pushNamed(WifiUsagePeriodPage.routeName),
+                  leading: const Icon(Icons.data_usage),
+                  title: Text('Data Usage Period', style: Theme.of(context).textTheme.bodyMedium),
+                  onPressed: () => Navigator.of(context).pushNamed(DataUsagePeriodPage.routeName),
                 ),
 
               ],

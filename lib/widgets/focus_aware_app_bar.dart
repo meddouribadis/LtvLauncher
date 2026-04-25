@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/settings_service.dart';
-import 'daily_wifi_usage_widget.dart';
+import 'daily_data_usage_widget.dart';
 import 'date_time_widget.dart';
 import 'network_widget.dart';
 
@@ -91,11 +91,11 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
                     )
                   : const SizedBox.shrink(),
               ),
-              // WiFi usage widget
+              // Data usage widget
               Selector<SettingsService, bool>(
-                selector: (_, settings) => settings.showWifiWidgetInStatusBar,
-                builder: (context, showWifi, _) => showWifi
-                  ? const DailyWifiUsageWidget()
+                selector: (_, settings) => settings.showDataWidgetInStatusBar,
+                builder: (context, showData, _) => showData
+                  ? const DailyDataUsageWidget()
                   : const SizedBox.shrink(),
               ),
             ],

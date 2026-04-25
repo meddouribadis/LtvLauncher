@@ -89,24 +89,24 @@ public class MainActivity extends FlutterActivity {
                 case "checkForGetContentAvailability" -> result.success(checkForGetContentAvailability());
                 case "startAmbientMode" -> result.success(startAmbientMode());
                 case "getActiveNetworkInformation" -> result.success(getActiveNetworkInformation());
-                case "getDailyWifiUsage" -> {
-                    long usage = getDailyWifiUsage();
+                case "getDailyDataUsage" -> {
+                    long usage = getDailyDataUsage();
                     if (usage == -1) {
                         result.error("PERMISSION_DENIED", "Usage stats permission not granted", null);
                     } else {
                         result.success(usage);
                     }
                 }
-                case "getWeeklyWifiUsage" -> {
-                    long usage = getWeeklyWifiUsage();
+                case "getWeeklyDataUsage" -> {
+                    long usage = getWeeklyDataUsage();
                     if (usage == -1) {
                         result.error("PERMISSION_DENIED", "Usage stats permission not granted", null);
                     } else {
                         result.success(usage);
                     }
                 }
-                case "getMonthlyWifiUsage" -> {
-                    long usage = getMonthlyWifiUsage();
+                case "getMonthlyDataUsage" -> {
+                    long usage = getMonthlyDataUsage();
                     if (usage == -1) {
                         result.error("PERMISSION_DENIED", "Usage stats permission not granted", null);
                     } else {
@@ -425,7 +425,7 @@ public class MainActivity extends FlutterActivity {
         return bitmap;
     }
 
-    private long getDailyWifiUsage() {
+    private long getDailyDataUsage() {
         if (!checkUsageStatsPermission()) {
             return -1;
         }
@@ -444,20 +444,42 @@ public class MainActivity extends FlutterActivity {
 
         long totalBytes = 0;
         try {
-            NetworkStats.Bucket bucket = networkStatsManager.querySummaryForDevice(
-                    NetworkCapabilities.TRANSPORT_WIFI,
-                    "",
+            NetworkStats.Bucket wifiBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_WIFI,
+                    null,
                     startTime,
                     endTime);
-            totalBytes = bucket.getRxBytes() + bucket.getTxBytes();
-        } catch (RemoteException e) {
+            totalBytes += wifiBucket.getRxBytes() + wifiBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            NetworkStats.Bucket mobileBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_MOBILE,
+                    null,
+                    startTime,
+                    endTime);
+            totalBytes += mobileBucket.getRxBytes() + mobileBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            NetworkStats.Bucket ethernetBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_ETHERNET,
+                    null,
+                    startTime,
+                    endTime);
+            totalBytes += ethernetBucket.getRxBytes() + ethernetBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
             e.printStackTrace();
         }
 
         return totalBytes;
     }
 
-    private long getWeeklyWifiUsage() {
+    private long getWeeklyDataUsage() {
         if (!checkUsageStatsPermission()) {
             return -1;
         }
@@ -477,20 +499,42 @@ public class MainActivity extends FlutterActivity {
 
         long totalBytes = 0;
         try {
-            NetworkStats.Bucket bucket = networkStatsManager.querySummaryForDevice(
-                    NetworkCapabilities.TRANSPORT_WIFI,
-                    "",
+            NetworkStats.Bucket wifiBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_WIFI,
+                    null,
                     startTime,
                     endTime);
-            totalBytes = bucket.getRxBytes() + bucket.getTxBytes();
-        } catch (RemoteException e) {
+            totalBytes += wifiBucket.getRxBytes() + wifiBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            NetworkStats.Bucket mobileBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_MOBILE,
+                    null,
+                    startTime,
+                    endTime);
+            totalBytes += mobileBucket.getRxBytes() + mobileBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            NetworkStats.Bucket ethernetBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_ETHERNET,
+                    null,
+                    startTime,
+                    endTime);
+            totalBytes += ethernetBucket.getRxBytes() + ethernetBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
             e.printStackTrace();
         }
 
         return totalBytes;
     }
 
-    private long getMonthlyWifiUsage() {
+    private long getMonthlyDataUsage() {
         if (!checkUsageStatsPermission()) {
             return -1;
         }
@@ -510,13 +554,35 @@ public class MainActivity extends FlutterActivity {
 
         long totalBytes = 0;
         try {
-            NetworkStats.Bucket bucket = networkStatsManager.querySummaryForDevice(
-                    NetworkCapabilities.TRANSPORT_WIFI,
-                    "",
+            NetworkStats.Bucket wifiBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_WIFI,
+                    null,
                     startTime,
                     endTime);
-            totalBytes = bucket.getRxBytes() + bucket.getTxBytes();
-        } catch (RemoteException e) {
+            totalBytes += wifiBucket.getRxBytes() + wifiBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            NetworkStats.Bucket mobileBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_MOBILE,
+                    null,
+                    startTime,
+                    endTime);
+            totalBytes += mobileBucket.getRxBytes() + mobileBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            NetworkStats.Bucket ethernetBucket = networkStatsManager.querySummaryForDevice(
+                    ConnectivityManager.TYPE_ETHERNET,
+                    null,
+                    startTime,
+                    endTime);
+            totalBytes += ethernetBucket.getRxBytes() + ethernetBucket.getTxBytes();
+        } catch (RemoteException | SecurityException e) {
             e.printStackTrace();
         }
 
