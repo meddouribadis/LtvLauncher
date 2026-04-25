@@ -25,6 +25,8 @@ class FLauncherChannel {
   static const _appsEventChannel = EventChannel('me.efesser.flauncher/event_apps');
   static const _networkEventChannel = EventChannel('me.efesser.flauncher/event_network');
 
+  static const _watchNextMaxItems = 10;
+
   Future<List<Map<dynamic, dynamic>>> getApplications() async {
     List<Map<dynamic, dynamic>>? applications = await _methodChannel.invokeListMethod("getApplications");
     return applications!;
@@ -119,4 +121,44 @@ class FLauncherChannel {
         Map<dynamic, dynamic> eventMap = event;
         listener(eventMap.cast<String, dynamic>());
       });
+
+  // Watch Next / TV Channels API
+  Future<List<Map<dynamic, dynamic>>> getWatchNextItems() async {
+    try {
+      var result = await _methodChannel.invokeMethod('getWatchNextItems', _watchNextMaxItems);
+      if (result == null) return [];
+      return (result as List).cast<Map<dynamic, dynamic>>();
+    } on PlatformException catch (e) {
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<bool> launchWatchNextItem(String? packageName, String? contentId, String? action) async {
+    try {
+      var result = await _methodChannel.invokeMethod('launchWatchNextItem', {
+        'packageName': packageName,
+        'contentId': contentId,
+        'action': action,
+      });
+      return result ?? false;
+    } on PlatformException catch (e) {
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Load image bytes from a content:// URI (for Watch Next posters)
+  Future<Uint8List> loadContentUriImage(String contentUri) async {
+    try {
+      var result = await _methodChannel.invokeMethod('loadContentUriImage', contentUri);
+      return result ?? Uint8List(0);
+    } on PlatformException catch (e) {
+      return Uint8List(0);
+    } catch (e) {
+      return Uint8List(0);
+    }
+  }
 }

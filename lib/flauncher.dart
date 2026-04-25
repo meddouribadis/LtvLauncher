@@ -32,6 +32,7 @@ import 'package:flauncher/widgets/category_row.dart';
 import 'package:flauncher/widgets/launcher_alternative_view.dart';
 import 'package:flauncher/widgets/focus_aware_app_bar.dart';
 import 'package:flauncher/widgets/wallpaper_video_background.dart';
+import 'package:flauncher/widgets/watch_next_row.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -106,31 +107,40 @@ class _FLauncherState extends State<FLauncher> {
       return true;
     }).toList();
 
+    final showWatchNextSection = context.select<SettingsService, bool>(
+          (s) => s.showWatchNextSection,
+    );
+
     if (favoriteApps.isEmpty && otherSections.isEmpty)
       return _emptyState(context);
 
     return CustomScrollView(
       slivers: [
-        if (favoriteApps.isNotEmpty) ...[
+        if (favoriteApps.isNotEmpty || showWatchNextSection) ...[
           SliverToBoxAdapter(
             child: SizedBox(
               height: MediaQuery.of(context).size.height -
                   MediaQuery.of(context).padding.top -
                   kToolbarHeight -
-                  150,
+                  (showWatchNextSection ? 420 : 150),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: _kDockOuterPadding,
-              child: _dock(
-                context,
-                favoritesCategory!,
-                favoriteApps,
-                appsService,
+          if (showWatchNextSection)
+            const SliverToBoxAdapter(
+              child: WatchNextRow(isFirstSection: false, isAboveDock: true),
+          ),
+          if (favoriteApps.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: _kDockOuterPadding,
+                child: _dock(
+                  context,
+                  favoritesCategory!,
+                  favoriteApps,
+                  appsService,
+                ),
               ),
             ),
-          ),
         ],
         ..._buildSectionSlivers(otherSections,
             firstCategoryAlreadyFound: favoriteApps.isNotEmpty),
@@ -342,7 +352,9 @@ class _FLauncherState extends State<FLauncher> {
         width: physicalSize.width,
         height: physicalSize.height,
         child: WallpaperVideoBackground(
-            key: Key("background_video"), file: videoFile),
+          key: ValueKey("background_video_${wallpaperService.wallpaperRevision}"),
+          file: videoFile,
+        ),
       );
     }
     if (wallpaperService.wallpaper != null) {
@@ -351,7 +363,7 @@ class _FLauncherState extends State<FLauncher> {
           wallpaperService.wallpaper!,
           height: physicalSize.height.toInt(),
         ),
-        key: const Key("background"),
+        key: ValueKey("background_${wallpaperService.wallpaperRevision}"),
         fit: BoxFit.cover,
         height: physicalSize.height,
         width: physicalSize.width,

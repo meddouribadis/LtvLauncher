@@ -73,18 +73,20 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   (AppImageType, ImageProvider)? _loadedImage;
   bool _imageLoadError = false;
 
-  late final AnimationController _animation = AnimationController(
-    vsync: this,
-    duration: const Duration(
-      milliseconds: 1200,
-    ),
-  );
+  late final AnimationController _animation;
 
-  late final CurvedAnimation _curvedAnimation =  CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
+  late final CurvedAnimation _curvedAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animation = AnimationController(
+      vsync: this,
+      duration: const Duration(
+        milliseconds: 1200,
+      ),
+    );
+    _curvedAnimation = CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
     _focusNode = FocusNode();
     _isTraditionalHighlightMode = FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
 
@@ -334,13 +336,22 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
     else {
       return const Padding(
         padding: EdgeInsets.all(8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 0, width: 16),
-            Text("Loading")
-          ],
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 8),
+                Text("Loading"),
+              ],
+            ),
+          ),
         ),
       );
     }

@@ -23,6 +23,7 @@ import 'package:flauncher/flauncher_channel.dart';
 import 'package:flauncher/gradients.dart';
 import 'package:flauncher/providers/settings_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/painting.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -38,8 +39,10 @@ class WallpaperService extends ChangeNotifier {
   late File _wallpaperNightVideoFile;
   bool _initialized = false;
   Timer? _timer;
+  int _wallpaperRevision = 0;
 
   ImageProvider? _wallpaper;
+  int get wallpaperRevision => _wallpaperRevision;
 
   ImageProvider? get wallpaper => _wallpaper;
 
@@ -153,6 +156,7 @@ class WallpaperService extends ChangeNotifier {
 
     if (_wallpaper != newWallpaper || videoFile != null || force) {
       _wallpaper = newWallpaper;
+      _wallpaperRevision++;
       notifyListeners();
     }
   }
@@ -202,6 +206,8 @@ class WallpaperService extends ChangeNotifier {
 
       // Evict from cache to ensure UI updates
       await FileImage(targetFile).evict();
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
 
       _updateWallpaper(force: true);
     }
