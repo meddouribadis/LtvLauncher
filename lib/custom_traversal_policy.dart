@@ -21,6 +21,12 @@ class RowByRowTraversalPolicy extends FocusTraversalPolicy with DirectionalFocus
     NodeSearcher searcher = NodeSearcher(direction);
     List<CandidateNode> candidates = searcher.findCandidates(nodes, currentNode);
     if (candidates.isEmpty) {
+      // Keep horizontal navigation bounded to the current row.
+      // Falling back to the default policy here can jump to unrelated widgets
+      // (for example WatchNext cards) when pressing right on the last grid item.
+      if (direction == TraversalDirection.left || direction == TraversalDirection.right) {
+        return false;
+      }
       return super.inDirection(currentNode, direction);
     }
     FocusNode nextNode = searcher.findBestFocusNode(candidates, currentNode);
