@@ -73,18 +73,20 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   (AppImageType, ImageProvider)? _loadedImage;
   bool _imageLoadError = false;
 
-  late final AnimationController _animation = AnimationController(
-    vsync: this,
-    duration: const Duration(
-      milliseconds: 1200,
-    ),
-  );
+  late final AnimationController _animation;
 
-  late final CurvedAnimation _curvedAnimation =  CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
+  late final CurvedAnimation _curvedAnimation;
 
   @override
   void initState() {
     super.initState();
+    _animation = AnimationController(
+      vsync: this,
+      duration: const Duration(
+        milliseconds: 1200,
+      ),
+    );
+    _curvedAnimation = CurvedAnimation(parent: _animation, curve: Curves.easeInOut);
     _focusNode = FocusNode();
     _isTraditionalHighlightMode = FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
 
