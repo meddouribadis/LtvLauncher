@@ -31,6 +31,7 @@ class WatchNextService extends ChangeNotifier {
   bool _hasPermission = true;
   final Map<String, Uint8List> _posterCache = {};
   final Set<String> _loadingPosters = {};
+  final Set<String> _failedPosters = {};
   Timer? _refreshTimer;
   Timer? _posterNotifyDebounce;
   static const int _maxParallelPosterLoads = 2;
@@ -108,7 +109,7 @@ class WatchNextService extends ChangeNotifier {
   }
 
   void ensurePosterLoaded(String? uri) {
-    if (uri == null || _posterCache.containsKey(uri) || _loadingPosters.contains(uri)) {
+    if (uri == null || _posterCache.containsKey(uri) || _failedPosters.contains(uri) || _loadingPosters.contains(uri)) {
       return;
     }
     unawaited(_loadPosterImage(uri));
@@ -134,9 +135,15 @@ class WatchNextService extends ChangeNotifier {
 
       if (imageBytes != null && imageBytes.isNotEmpty) {
         _posterCache[uri] = imageBytes;
+        _failedPosters.remove(uri);
+        _schedulePosterCacheNotification();
+      } else {
+        _failedPosters.add(uri);
         _schedulePosterCacheNotification();
       }
     } catch (_) {
+      _failedPosters.add(uri);
+      _schedulePosterCacheNotification();
     } finally {
       _loadingPosters.remove(uri);
     }
@@ -152,6 +159,11 @@ class WatchNextService extends ChangeNotifier {
   Uint8List? getCachedPoster(String? uri) {
     if (uri == null) return null;
     return _posterCache[uri];
+  }
+
+  bool hasPosterLoadFailed(String? uri) {
+    if (uri == null) return false;
+    return _failedPosters.contains(uri);
   }
 
   Future<void> launchItem(WatchNextItem item) async {

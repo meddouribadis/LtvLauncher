@@ -35,7 +35,8 @@ void _playFocusSound(BuildContext context) {
 
 const double _kWatchNextItemWidth = 400;
 const double _kWatchNextItemHeight = 220;
-const double _kWatchNextItemSpacing = 12;
+const double _kWatchNextItemSpacing = 16;
+const double _kWatchNextRowVerticalSlack = 8;
 
 class WatchNextRow extends StatelessWidget {
   final bool isFirstSection;
@@ -187,7 +188,7 @@ class _WatchNextCleanRowState extends State<_WatchNextCleanRow> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: _kWatchNextItemHeight + 24,
+      height: _kWatchNextItemHeight + 24 + _kWatchNextRowVerticalSlack,
       child: ListView.builder(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
@@ -287,7 +288,12 @@ class _WatchNextCardState extends State<_WatchNextCard> {
     final posterData = context.select<WatchNextService, Uint8List?>(
       (service) => service.getCachedPoster(widget.item.posterUri),
     );
-    final targetScale = _clicked ? 0.94 : (_isHovered ? 1.03 : 1.0);
+    final targetScale = _clicked ? 0.94 : (_isHovered ? 1.06 : 1.0);
+
+    final posterLoadFailed = context.select<WatchNextService, bool>(
+      (service) => service.hasPosterLoadFailed(widget.item.posterUri),
+    );
+
 
     return Padding(
       padding: const EdgeInsets.only(right: _kWatchNextItemSpacing),
@@ -312,7 +318,7 @@ class _WatchNextCardState extends State<_WatchNextCard> {
               curve: Curves.easeOutCubic,
               child: Card(
                 margin: EdgeInsets.zero,
-                elevation: _isHovered ? 8 : 2,
+                elevation: _isHovered ? 4 : 2,
                 clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -323,7 +329,7 @@ class _WatchNextCardState extends State<_WatchNextCard> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      _buildPoster(posterData),
+                      _buildPoster(posterData, posterLoadFailed),
                       if (_isHovered) _buildOverlay(),
                       if (_isHovered) _buildProgressIndicator(),
                       if (_isHovered)
@@ -350,7 +356,7 @@ class _WatchNextCardState extends State<_WatchNextCard> {
     );
   }
 
-  Widget _buildPoster(Uint8List? posterData) {
+  Widget _buildPoster(Uint8List? posterData, bool posterLoadFailed) {
     if (posterData != null) {
       return Image.memory(
         posterData,
@@ -365,7 +371,7 @@ class _WatchNextCardState extends State<_WatchNextCard> {
 
     return Container(
       color: Colors.grey.shade800,
-      child: widget.item.posterUri != null
+      child: widget.item.posterUri != null && !posterLoadFailed
           ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
           : _buildFallbackWidget(),
     );
