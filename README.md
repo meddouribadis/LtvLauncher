@@ -140,6 +140,12 @@ Because Android's `WallpaperManager` is not available on some Android TV devices
 
 Please note that changing wallpaper requires a file explorer to be installed on the device in order to pick a file.
 
+## Contributors
+
+<a href="https://github.com/meddouribadis/arclauncher/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=meddouribadis/arclauncher" alt="Contributors" />
+</a>
+
 ## Credits
 
 ### Original Projects
@@ -147,6 +153,6 @@ Please note that changing wallpaper requires a file explorer to be installed on 
 - **[FLauncher](https://gitlab.com/flauncher/flauncher)** by [etienn01](https://github.com/etienn01) - The original project
 - **[FLauncher (Fork)](https://github.com/osrosal/flauncher)** by [osrosal](https://github.com/osrosal) - Community fork with additional features
 - **[LTvLauncher](https://github.com/LeanBitLab/LtvLauncher)** by [LeanBitLab](https://github.com/LeanBitLab) - The base for this fork
-- Customizations by [meddouribadis](https://github.com/meddouribadis)
+- **[Arc Launcher](https://github.com/meddouribadis/arclauncher)** by [meddouribadis](https://github.com/meddouribadis)
 
 ---
