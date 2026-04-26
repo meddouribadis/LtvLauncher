@@ -27,6 +27,7 @@ dependencies:
   video_player: ^2.9.5
   http: ^1.2.2
 
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
