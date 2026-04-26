@@ -23,8 +23,10 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 - **Inbuilt OLED Screensaver** - Minimal screensaver with 30s clock position shifting to prevent burn-in.
 - **Easy WiFi Access** - Network indicator doubles as a shortcut to system WiFi settings.
 - **Quick Presets** - Select Time/Date formats and Category names from a list (No keyboard required).
-- **Time-Based Wallpaper** - Automatically switch between day and night backgrounds.
-- **Pitch Black Wallpaper** - Added a true black gradient background option.
+- **Video Wallpaper** - Set animated video files as your home screen background for a dynamic visual experience.
+- **Dynamic & Time-Based Wallpaper** - Switch between day/night backgrounds or enable automatic dark mode based on time.
+- **Watch Next Section** - Continue watching your shows with a dedicated "Watch Next" row at the top.
+- **Pitch Black Wallpaper** - A true black gradient background option for OLED optimization.
 - **Enhanced Focus Indicator** - New double-border design ensures perfect visibility on any background.
 - **Smart Navigation** - Fixed "bounce back" issues and optimized focus traversal for a smoother experience.
 - **Refined Settings** - Reorganized menus with a new "Miscellaneous" section and unified focus styles.
@@ -39,6 +41,12 @@ This customized version introduces a modern smart TV-style grid layout, usabilit
 
 > [!WARNING]
 > **Brightness Scheduler is an experimental feature.** It is currently untested across all devices and may be removed or modified in future versions based on user feedback.
+
+> [!TIP]
+> **Video Wallpaper Performance:** Using video wallpapers with the backdrop blur filter enabled may cause performance issues on older or low-powered devices. If you experience stuttering or lag, disable the backdrop filter in settings when using video backgrounds.
+
+> [!TIP]
+> **Video File Size:** Video wallpapers are loaded into RAM for smooth playback. For optimal performance, use small, compressed video files (ideally under 10MB) rather than large, high-bitrate videos.
 
 ## Screenshots
 
