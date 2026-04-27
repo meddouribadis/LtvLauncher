@@ -194,6 +194,49 @@ body {
     font-size: 0.95em;
 }
 
+/* Orange Accent Button */
+.btn-orange {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #F97316, #EA580C);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+}
+
+.btn-orange:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(249, 115, 22, 0.4);
+}
+
+.btn-orange-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: transparent;
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    border-radius: 10px;
+    color: #F97316;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.btn-orange-outline:hover {
+    background: rgba(249, 115, 22, 0.1);
+    border-color: #F97316;
+}
+
 .icon-download {
     width: 20px;
     height: 20px;
