@@ -97,6 +97,8 @@ class _FLauncherState extends State<FLauncher> {
       );
 
   Widget _tvOSLayout(BuildContext context, AppsService appsService) {
+    final showAppNames =
+        context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
     final favoritesCategory =
         appsService.categories.firstWhereOrNull((c) => c.name == 'Favorites');
     final favoriteApps = favoritesCategory?.applications ?? const [];
@@ -132,15 +134,18 @@ class _FLauncherState extends State<FLauncher> {
             ),
           ),
         ],
-        ..._buildSectionSlivers(otherSections,
-            firstCategoryAlreadyFound: favoriteApps.isNotEmpty),
+        ..._buildSectionSlivers(
+          otherSections,
+          firstCategoryAlreadyFound: favoriteApps.isNotEmpty,
+          showAppNames: showAppNames,
+        ),
         const SliverToBoxAdapter(child: SizedBox(height: 64)),
       ],
     );
   }
 
   List<Widget> _buildSectionSlivers(List<LauncherSection> sections,
-      {bool firstCategoryAlreadyFound = false}) {
+      {bool firstCategoryAlreadyFound = false, required bool showAppNames}) {
     final List<Widget> slivers = [];
     bool firstCategoryFound = firstCategoryAlreadyFound;
 
@@ -209,9 +214,10 @@ class _FLauncherState extends State<FLauncher> {
               key: sectionKey,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: category.columnsCount,
-                childAspectRatio: 16 / 9,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 0,
+                childAspectRatio:
+                    appCardAspectRatio(showNameBelowCards: showAppNames),
+                mainAxisSpacing: appCardGridMainAxisSpacing,
+                crossAxisSpacing: appCardGridCrossAxisSpacing,
               ),
               delegate: SliverChildBuilderDelegate(
                 childCount: filteredApps.length,
@@ -224,8 +230,7 @@ class _FLauncherState extends State<FLauncher> {
                 },
                 (context, index) => Padding(
                   key: Key(filteredApps[index].packageName),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  padding: appCardGridItemPadding,
                   child: AppCard(
                     category: category,
                     application: filteredApps[index],

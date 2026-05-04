@@ -44,6 +44,8 @@ class AppsGrid extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final showAppNames =
+        context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
     Widget categoryContent;
     if (applications.isEmpty) {
       categoryContent = categoryContainerEmptyState(context);
@@ -52,14 +54,14 @@ class AppsGrid extends StatelessWidget
       categoryContent = GridView.custom(
         primary: false,
         shrinkWrap: true,
-        gridDelegate: _buildSliverGridDelegate(),
+        gridDelegate: _buildSliverGridDelegate(showAppNames: showAppNames),
         //padding: EdgeInsets.all(16),
         childrenDelegate: SliverChildBuilderDelegate(
           childCount: applications.length,
           findChildIndexCallback: _findChildIndex,
           (context, index) => Padding(
             key: Key(applications[index].packageName),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            padding: appCardGridItemPadding,
             child: AppCard(
                 category: category,
                 application: applications[index],
@@ -154,11 +156,11 @@ class AppsGrid extends StatelessWidget
     appsService.saveApplicationOrderInCategory(category);
   }
 
-  SliverGridDelegate _buildSliverGridDelegate() => SliverGridDelegateWithFixedCrossAxisCount(
+  SliverGridDelegate _buildSliverGridDelegate({required bool showAppNames}) => SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: category.columnsCount,
-        childAspectRatio: 16 / 9,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 0,
+        childAspectRatio: appCardAspectRatio(showNameBelowCards: showAppNames),
+        mainAxisSpacing: appCardGridMainAxisSpacing,
+        crossAxisSpacing: appCardGridCrossAxisSpacing,
       );
 
 }
